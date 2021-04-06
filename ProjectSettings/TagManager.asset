@@ -13,7 +13,7 @@ TagManager:
   - Peons
   - Water
   - UI
-  - 
+  - Rabbits
   - 
   - 
   - 
@@ -45,6 +45,9 @@ TagManager:
     locked: 0
   - name: Sprites
     uniqueID: 1855571897
+    locked: 0
+  - name: Rabbits
+    uniqueID: 1429614425
     locked: 0
   - name: Peons
     uniqueID: 4240384489
