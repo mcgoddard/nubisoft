@@ -21,7 +21,7 @@ public class Peon : MonoBehaviour
     private float stateChangeTimeout = STATE_CHANGE_TIMEOUT;
     private float randomDirectionTimeout = RANDOM_DIRECTION_TIMEOUT;
     private new Rigidbody2D rigidbody;
-    private const float SPEED = 0.25f;
+    private const float SPEED = 1f;
     private const float ROTATION_SPEED = 1f;
     private const float STATE_CHANGE_TIMEOUT = 15.0f;
     private const float MAP_SIZE = 20.0f;
@@ -29,10 +29,17 @@ public class Peon : MonoBehaviour
     private const float GROUP_STANDOFF_DISTANCE = 0.5f;
     private const float CATCH_DISTANCE = 0.3f;
     private const float SACRIFICE_DISTANCE = 0.5f;
+    private const float NEIGHBOUR_SEARCH_RADIUS = 2f;
+    private float fear;
+    private const float FEAR_MAX = 1.0f;
+    private const float FEAR_MIN = 0.0f;
+    private const float FEAR_DECAY_RATE = 0.05f;
+    private const float FEAR_TRANSFER_RATE = 1f;
 
     // Start is called before the first frame update
     void Start()
     {
+        fear = Random.value;
         rigidbody = GetComponent<Rigidbody2D>();
         altar = GameObject.Find("Altar");
         if (Random.value < 0.5) {
@@ -130,13 +137,15 @@ public class Peon : MonoBehaviour
         Vector3 vectorToTarget = target - (Vector2)transform.position;
         float angle = Mathf.Atan2(vectorToTarget.y, vectorToTarget.x) * Mathf.Rad2Deg;
         Quaternion q = Quaternion.AngleAxis(angle, Vector3.forward);
-        transform.rotation = Quaternion.Slerp(transform.rotation, q, Time.deltaTime * ROTATION_SPEED);
+        transform.rotation = Quaternion.Slerp(transform.rotation, q, Time.deltaTime * ROTATION_SPEED * fear);
         if (move) {
-            rigidbody.velocity = vectorToTarget.normalized * SPEED;
+            rigidbody.velocity = vectorToTarget.normalized * SPEED * fear;
         } else {
             rigidbody.velocity = new Vector2(0, 0);
         }
         stateChangeTimeout -= Time.deltaTime;
+
+        UpdateFear(neighbours);
     }
 
     // Move towards the centrepoint of your neighbours, but don't get too close to the centre
@@ -164,7 +173,7 @@ public class Peon : MonoBehaviour
 
     // Get the colliders for nearby Peons (your neighbours)
     Collider2D[] GetNeighbours() {
-        return Physics2D.OverlapCircleAll(transform.position, 2, peonsLayer);
+        return Physics2D.OverlapCircleAll(transform.position, NEIGHBOUR_SEARCH_RADIUS, peonsLayer);
     }
 
     // Get the colliders for nearby Bunnies
@@ -182,5 +191,27 @@ public class Peon : MonoBehaviour
     float plusMinusPercent(float original, float percent) {
         float twentyPercent = original * ((percent * 2) / 100);
         return original + (Random.value * twentyPercent) - (twentyPercent / 2.0f);
+    }
+
+    void UpdateFear(Collider2D[] neighbours) {
+        var surroundingFear = neighbours.Average(it => {
+            var neighbour = it.GetComponent<Peon>();
+            var normalisedDistance = (this.transform.position - neighbour.transform.position).magnitude / NEIGHBOUR_SEARCH_RADIUS;
+            return 1f - (neighbour.fear * normalisedDistance);
+        });
+        if (surroundingFear > fear) {
+            fear = Mathf.Lerp(fear, surroundingFear, FEAR_TRANSFER_RATE * Time.deltaTime);
+            fear = Mathf.Clamp(fear, FEAR_MIN, FEAR_MAX);
+        } else {
+            fear = Mathf.Lerp(fear, FEAR_MIN, FEAR_DECAY_RATE * Time.deltaTime);
+        }
+    }
+
+    void OnMouseDown() {
+        this.fear = FEAR_MAX;
+    }
+
+    public float GetFear() {
+        return fear;
     }
 }
