@@ -34,7 +34,7 @@ public class Peon : MonoBehaviour
     private const float BUNNY_SEARCH_RADIUS = 1f;
     private const float FEAR_MAX = 1.0f;
     private const float FEAR_MIN = 0.0f;
-    private const float FEAR_DECAY_RATE = 0.01f;
+    private const float FEAR_DECAY_RATE = 0.2f;
     private const float FEAR_TRANSFER_RATE = 1f;
     private const float FEAR_SACRIFICE_MAX = 0.6f;
     private const float FEAR_SACRIFICE_MIN = 0.4f;
@@ -43,7 +43,7 @@ public class Peon : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        fear = Random.value;
+        fear = Random.Range(0.1f, 0.7f);
         rigidbody = GetComponent<Rigidbody2D>();
         altar = GameObject.Find("Altar");
         if (Random.value < 0.5) {
@@ -104,6 +104,8 @@ public class Peon : MonoBehaviour
             case State.Sacrifice:
                 // If we're done sacrificing go back to wandering
                 if (stateChangeTimeout < 0) {
+                    UiUpdate.sacrifices += 1;
+                    UiUpdate.bunnies -= 1;
                     SetRandomTarget();
                     SetState(State.Wandering);
                 }
