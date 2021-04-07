@@ -100,7 +100,12 @@ MonoBehaviour:
   peonsLayer:
     serializedVersion: 2
     m_Bits: 8
+  bunniesLayer:
+    serializedVersion: 2
+    m_Bits: 64
   state: 0
+  target: {x: 0, y: 0}
+  move: 1
 --- !u!58 &1778576840
 CircleCollider2D:
   m_ObjectHideFlags: 0

@@ -7,11 +7,17 @@ public class Peon : MonoBehaviour
     {
         Grouping,
         Wandering,
+        Chasing,
+        GoToSacrifice,
+        Sacrifice,
     }
     public LayerMask peonsLayer;
+    public LayerMask bunniesLayer;
     public State state = State.Grouping;
     public Vector2 target;
     public bool move = true;
+    private GameObject bunnyTarget;
+    private GameObject altar;
     private float stateChangeTimeout = STATE_CHANGE_TIMEOUT;
     private float randomDirectionTimeout = RANDOM_DIRECTION_TIMEOUT;
     private new Rigidbody2D rigidbody;
@@ -21,11 +27,14 @@ public class Peon : MonoBehaviour
     private const float MAP_SIZE = 20.0f;
     private const float RANDOM_DIRECTION_TIMEOUT = 10.0f;
     private const float GROUP_STANDOFF_DISTANCE = 0.5f;
+    private const float CATCH_DISTANCE = 0.3f;
+    private const float SACRIFICE_DISTANCE = 0.5f;
 
     // Start is called before the first frame update
     void Start()
     {
         rigidbody = GetComponent<Rigidbody2D>();
+        altar = GameObject.Find("Altar");
         if (Random.value < 0.5) {
             state = State.Grouping;
         } else {
@@ -45,19 +54,55 @@ public class Peon : MonoBehaviour
                 // or all neighbours have already left which to randomly wandering
                 if (((stateChangeTimeout < 0.0f || neighbours.Length < 3 || neighbours.Length > 4) && 
                     Random.value < (0.1 * Time.deltaTime)) || neighbours.Length == 1) {
-                    target = (Vector2)transform.position + new Vector2((Random.value * 10f) - 5f, (Random.value * 10f) - 5f);
-                    move = true;
+                    SetRandomTarget();
                     SetState(State.Wandering);
                 } else {
                     // Otherwise stay centred on the group
                     SetGroupTarget(neighbours);
                 }
                 break;
+            case State.Chasing:
+                // Check our target hasn't been picked up by another peon
+                if (bunnyTarget == null) {
+                    SetRandomTarget();
+                    SetState(State.Wandering);
+                } else if ((bunnyTarget.transform.position - transform.position).magnitude < CATCH_DISTANCE) {
+                    // If we've caught it update our state and destroy the bunny object
+                    GameObject.Destroy(bunnyTarget);
+                    SetState(State.GoToSacrifice);
+                } else {
+                    // Otherwise keep up the chase
+                    target = bunnyTarget.transform.position;
+                }
+                break;
+            case State.GoToSacrifice:
+                // If we've reached the alter start sacrificing
+                if ((transform.position - altar.transform.position).magnitude < SACRIFICE_DISTANCE) {
+                    SetState(State.Sacrifice);
+                } else {
+                    // Otherwise keep aiming for the altar
+                    target = altar.transform.position;
+                }
+                break;
+            case State.Sacrifice:
+                // If we're done sacrificing go back to wandering
+                if (stateChangeTimeout < 0) {
+                    SetRandomTarget();
+                    SetState(State.Wandering);
+                }
+                break;
             case State.Wandering:
             default:
+                // Check for some bunnies
+                Collider2D[] bunnies = GetBunnies();
+                // TODO should we actually chase a rabbit?
+                if (bunnies.Length > 0) {
+                    bunnyTarget = bunnies[0].gameObject;
+                    state = State.Chasing;
+                }
                 // If we've got some neighbours and are ready to finish wandering form a group with those neighbours
                 // This will result in following that neighbour if they aren't ready to group yet
-                if (stateChangeTimeout < 0 && neighbours.Length > 3) {
+                else if (stateChangeTimeout < 0 && neighbours.Length > 3) {
                     SetState(State.Grouping);
                 } else {
                     // Otherwise should we change direction?
@@ -111,9 +156,20 @@ public class Peon : MonoBehaviour
         target = direction;
     }
 
+    // Set a random target location
+    void SetRandomTarget() {
+        target = (Vector2)transform.position + new Vector2(Random.Range(-5f, 5f), Random.Range(-5f, 5f));
+        move = true;
+    }
+
     // Get the colliders for nearby Peons (your neighbours)
     Collider2D[] GetNeighbours() {
         return Physics2D.OverlapCircleAll(transform.position, 2, peonsLayer);
+    }
+
+    // Get the colliders for nearby Bunnies
+    Collider2D[] GetBunnies() {
+        return Physics2D.OverlapCircleAll(transform.position, 2, bunniesLayer);
     }
 
     // Change the Peons state and reset the timer before it will consider another state change
