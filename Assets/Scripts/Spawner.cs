@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,13 +12,15 @@ public class Spawner : MonoBehaviour
     private const float MAP_SIZE = 20.0f;
     private const float BUNNY_SPAWN_TIMEOUT = 2f;
     private float timeSinceLastBunnySpawn = 0f;
+    private GameObject[] peons;
 
     void Start()
     {
         Random.InitState((int)System.DateTime.Now.Ticks);
-        for (int i = 0; i < 100; i++) {
-            SpawnAtRandomPosition(peonPrefab);
-        }
+        peons = Enumerable
+            .Range(0, peonCount)
+            .Select(i => SpawnAtRandomPosition(peonPrefab))
+            .ToArray();
     }
 
     // Update is called once per frame
@@ -26,9 +29,12 @@ public class Spawner : MonoBehaviour
         if (timeSinceLastBunnySpawn >= BUNNY_SPAWN_TIMEOUT) {
             timeSinceLastBunnySpawn = 0f;
             SpawnAtRandomPosition(bunnyPrefab);
+            UiUpdate.bunnies += 1;
         } else {
             timeSinceLastBunnySpawn += Time.deltaTime;
         }
+
+        UiUpdate.fear = peons.Average(peon => peon.GetComponent<Peon>().fear);
     }
 
     public void SpawnBunny(Vector3 position) {
