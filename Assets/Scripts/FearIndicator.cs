@@ -6,29 +6,35 @@ public class FearIndicator : MonoBehaviour
 {
     private Peon peon;
 
-    private Gradient gradient;
+    private static Gradient gradient;
     // Start is called before the first frame update
-    void Start()
-    {
-        this.peon = this.GetComponentInParent<Peon>();
-        this.gradient = new Gradient();
 
-        var colorKeys = new GradientColorKey[]{
-            new GradientColorKey(Color.green, 0.0f),
-            new GradientColorKey(Color.yellow, 0.5f),
-            new GradientColorKey(Color.red, 1.0f),
-        };
+    static void InitGradient() {
+        if (gradient == null) {
+            gradient = new Gradient();
 
-        var alphaKeys = new GradientAlphaKey[]{
-            new GradientAlphaKey(1.0f, 0.0f)
-        };
+            var colorKeys = new GradientColorKey[]{
+                new GradientColorKey(Color.green, 0.0f),
+                new GradientColorKey(Color.yellow, 0.5f),
+                new GradientColorKey(Color.red, 1.0f),
+            };
 
-        this.gradient.SetKeys(colorKeys, alphaKeys);
+            var alphaKeys = new GradientAlphaKey[]{
+                new GradientAlphaKey(1.0f, 0.0f)
+            };
+
+            gradient.SetKeys(colorKeys, alphaKeys);
+        }
     }
 
-    // Update is called once per frame
+    void Start()
+    {
+        InitGradient();
+        this.peon = this.GetComponentInParent<Peon>();
+    }
+
     void Update()
     {
-        GetComponent<Renderer>().material.color = this.gradient.Evaluate(peon.GetFear());
+        GetComponent<Renderer>().material.color = gradient.Evaluate(peon.GetFear());
     }
 }
