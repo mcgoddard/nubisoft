@@ -1,0 +1,42 @@
+name: Acquire activation file
+on: [push]
+jobs:
+  windows:
+    name: Windows Build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: game-ci/unity-builder@v2
+      env:
+        UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+      with:
+        targetPlatform: Windows
+    - uses: actions/upload-artifact@v2
+      with:
+        name: WindowsBuild
+        path: build
+  mac:
+    name: Mac Build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: game-ci/unity-builder@v2
+      env:
+        UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+      with:
+        targetPlatform: Mac
+    - uses: actions/upload-artifact@v2
+      with:
+        name: MacBuild
+        path: build
+  linux:
+    name: Linux Build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: game-ci/unity-builder@v2
+      env:
+        UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+      with:
+        targetPlatform: Linux
+    - uses: actions/upload-artifact@v2
+      with:
+        name: LinuxBuild
+        path: build
