@@ -19,13 +19,13 @@ jobs:
         key: nubisoft-windows
         restore-keys: |
           nubisoft-
-    - name: build
+    - name: Build
       uses: game-ci/unity-builder@v2
       env:
         UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
       with:
         targetPlatform: StandaloneWindows64
-    - name: upload
+    - name: Upload
       uses: actions/upload-artifact@v2
       with:
         name: windows-${{ github.sha }}
@@ -45,13 +45,13 @@ jobs:
         key: nubisoft-mac
         restore-keys: |
           nubisoft-
-    - name: build
+    - name: Build
       uses: game-ci/unity-builder@v2
       env:
         UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
       with:
         targetPlatform: StandaloneOSX
-    - name: upload
+    - name: Upload
       uses: actions/upload-artifact@v2
       with:
         name: mac-${{ github.sha }}
@@ -71,13 +71,13 @@ jobs:
         key: nubisoft-linux
         restore-keys: |
           nubisoft-
-    - name: build
+    - name: Build
       uses: game-ci/unity-builder@v2
       env:
         UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
       with:
         targetPlatform: StandaloneLinux64
-    - name: upload
+    - name: Upload
       uses: actions/upload-artifact@v2
       with:
         name: linux-${{ github.sha }}
