@@ -65,6 +65,10 @@ public class FearController : MonoBehaviour
         return fear >= FEAR_SACRIFICE_MIN && fear <= FEAR_SACRIFICE_MAX;
     }
 
+    public bool IsTerrified() {
+        return fear >= 0.9f;
+    }
+
     public bool ShouldDropBunny() {
         // TODO: Add Min/Max limits so that that the drop range is inside fear range?
         return fear <= FEAR_SACRIFICE_MIN - BUNNY_DROP_BUFFER || fear >= FEAR_SACRIFICE_MAX + BUNNY_DROP_BUFFER;
