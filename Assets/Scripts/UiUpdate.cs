@@ -7,14 +7,17 @@ public class UiUpdate : MonoBehaviour
 {
     // Start is called before the first frame update
     public static int sacrifices = 0;
+    public static int kills = 0;
     public static int bunnies = 0;
     public static float fear = 5.0f;
-    private Text scoreText;
+    private Text sacrificesText;
+    private Text killsText;
     private Text fearText;
     private Text bunniesText;
     void Start()
     {
-        scoreText = this.transform.Find("Sacrifices").GetComponent<Text>();
+        sacrificesText = this.transform.Find("Sacrifices").GetComponent<Text>();
+        killsText = this.transform.Find("Kills").GetComponent<Text>();
         fearText = this.transform.Find("Fear").GetComponent<Text>();
         bunniesText = this.transform.Find("Bunnies").GetComponent<Text>();
     }
@@ -22,7 +25,8 @@ public class UiUpdate : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        scoreText.text = "Score: " + sacrifices;
+        sacrificesText.text = "Bunnies Sacrificed: " + sacrifices;
+        killsText.text = "Bunnies Killed: " + kills;
         fearText.text = "Fear Level: " + fear;
         bunniesText.text = "Bunnies: " + bunnies;
     }
