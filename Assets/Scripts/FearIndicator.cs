@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class FearIndicator : MonoBehaviour
 {
-    private Peon peon;
+    private FearController fearController;
 
     private static Gradient gradient;
     // Start is called before the first frame update
@@ -30,11 +30,11 @@ public class FearIndicator : MonoBehaviour
     void Start()
     {
         InitGradient();
-        this.peon = this.GetComponentInParent<Peon>();
+        this.fearController = this.GetComponentInParent<FearController>();
     }
 
     void Update()
     {
-        GetComponent<Renderer>().material.color = gradient.Evaluate(peon.GetFear());
+        GetComponent<Renderer>().material.color = gradient.Evaluate(fearController.GetFearLevel());
     }
 }

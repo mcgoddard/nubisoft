@@ -108,6 +108,7 @@ GameObject:
   - component: {fileID: 8465588287610908915}
   - component: {fileID: 1778576840}
   - component: {fileID: 8734758826331196684}
+  - component: {fileID: -9034651373678430050}
   m_Layer: 3
   m_Name: Peon
   m_TagString: Peons
@@ -202,7 +203,6 @@ MonoBehaviour:
   state: 0
   target: {x: 0, y: 0}
   move: 1
-  fear: 0
 --- !u!58 &1778576840
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -240,3 +240,21 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
+--- !u!114 &-9034651373678430050
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8465588287610908916}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 131a968a628b7a642807982012a6fe6c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  peonsLayer:
+    serializedVersion: 2
+    m_Bits: 8
+  bunniesLayer:
+    serializedVersion: 2
+    m_Bits: 64
