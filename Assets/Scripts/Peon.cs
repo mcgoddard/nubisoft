@@ -75,7 +75,11 @@ public class Peon : MonoBehaviour
                 } else if ((bunnyTarget.transform.position - transform.position).magnitude < CATCH_DISTANCE) {
                     // If we've caught it update our state and destroy the bunny object
                     GameObject.Destroy(bunnyTarget);
-                    SetState(State.CarryingBunny);
+                    if (fearController.fear <= 0.9f) {
+                        SetState(State.CarryingBunny);
+                    } else {
+                        UiUpdate.kills += 1;
+                    }
                 } else {
                     // Otherwise keep up the chase
                     target = bunnyTarget.transform.position;
@@ -88,7 +92,7 @@ public class Peon : MonoBehaviour
                 } else if(fearController.ShouldDropBunny()) {
                     // We either calmed down too much or walk past a bunch of terrified people to the point that we forget what we were doing
                     this.SetState(State.Wandering);
-                    this.transform.parent.GetComponent<Spawner>().SpawnBunny(this.transform.position);
+                    this.transform.parent.GetComponent<Spawner>()?.SpawnBunny(this.transform.position);
                 } else {
                     // Otherwise keep aiming for the altar
                     target = altar.transform.position;
@@ -106,8 +110,8 @@ public class Peon : MonoBehaviour
             case State.Wandering:
             default:
                 // TODO should we actually chase a rabbit?
-                if (fearController.IsSufficientlyScaredToSacrifice() && bunnies.Length > 0) {
-                    bunnyTarget = bunnies[0].gameObject;
+                if ((fearController.IsSufficientlyScaredToSacrifice() || fearController.fear >= 0.9f) && bunnies.Length > 0) {
+                    bunnyTarget = bunnies[0]?.gameObject;
                     SetState(State.Chasing);
                 }
                 // If we've got some neighbours and are ready to finish wandering form a group with those neighbours
