@@ -76,9 +76,11 @@ public class Peon : MonoBehaviour
                     // If we've caught it update our state and destroy the bunny object
                     GameObject.Destroy(bunnyTarget);
                     if (fearController.IsTerrified()) {
-                        SetState(State.CarryingBunny);
-                    } else {
+                        // Just kill it and go back to wandering
                         UiUpdate.kills += 1;
+                        SetState(State.Wandering);
+                    } else {
+                        SetState(State.CarryingBunny);
                     }
                 } else {
                     // Otherwise keep up the chase
