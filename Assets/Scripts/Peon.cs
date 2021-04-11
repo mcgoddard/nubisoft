@@ -16,9 +16,9 @@ public class Peon : MonoBehaviour
     public State state = State.Grouping;
     public Vector2 target;
     public bool move = true;
-    public float fear;
     private GameObject bunnyTarget;
     private GameObject altar;
+    private FearController fearController;
     private float stateChangeTimeout = STATE_CHANGE_TIMEOUT;
     private float randomDirectionTimeout = RANDOM_DIRECTION_TIMEOUT;
     private new Rigidbody2D rigidbody;
@@ -32,18 +32,11 @@ public class Peon : MonoBehaviour
     private const float SACRIFICE_DISTANCE = 0.5f;
     private const float NEIGHBOUR_SEARCH_RADIUS = 2f;
     private const float BUNNY_SEARCH_RADIUS = 1f;
-    private const float FEAR_MAX = 1.0f;
-    private const float FEAR_MIN = 0.0f;
-    private const float FEAR_DECAY_RATE = 0.2f;
-    private const float FEAR_TRANSFER_RATE = 1f;
-    private const float FEAR_SACRIFICE_MAX = 0.6f;
-    private const float FEAR_SACRIFICE_MIN = 0.4f;
-    private const float BUNNY_DROP_BUFFER = 0.2f;
 
     // Start is called before the first frame update
     void Start()
     {
-        fear = Random.Range(0.1f, 0.7f);
+        fearController = GetComponent<FearController>();
         rigidbody = GetComponent<Rigidbody2D>();
         altar = GameObject.Find("Altar");
         if (Random.value < 0.5) {
@@ -92,7 +85,7 @@ public class Peon : MonoBehaviour
                 // If we've reached the alter start sacrificing
                 if ((transform.position - altar.transform.position).magnitude < SACRIFICE_DISTANCE) {
                     SetState(State.Sacrifice);
-                } else if(shouldDropBunny()) {
+                } else if(fearController.ShouldDropBunny()) {
                     // We either calmed down too much or walk past a bunch of terrified people to the point that we forget what we were doing
                     this.SetState(State.Wandering);
                     this.transform.parent.GetComponent<Spawner>().SpawnBunny(this.transform.position);
@@ -113,7 +106,7 @@ public class Peon : MonoBehaviour
             case State.Wandering:
             default:
                 // TODO should we actually chase a rabbit?
-                if (isSufficientlyScaredToSacrifice() && bunnies.Length > 0) {
+                if (fearController.IsSufficientlyScaredToSacrifice() && bunnies.Length > 0) {
                     bunnyTarget = bunnies[0].gameObject;
                     SetState(State.Chasing);
                 }
@@ -154,8 +147,6 @@ public class Peon : MonoBehaviour
             rigidbody.velocity = new Vector2(0, 0);
         }
         stateChangeTimeout -= Time.deltaTime;
-
-        UpdateFear(neighbours, bunnies);
     }
 
     // Move towards the centrepoint of your neighbours, but don't get too close to the centre
@@ -201,52 +192,5 @@ public class Peon : MonoBehaviour
     float plusMinusPercent(float original, float percent) {
         float twentyPercent = original * ((percent * 2) / 100);
         return original + (Random.value * twentyPercent) - (twentyPercent / 2.0f);
-    }
-
-    void UpdateFear(Collider2D[] neighbours, Collider2D[] bunnies) {
-        // Calculate the number of bunnies surrounding the Peon. this is normalised by distance so that bunnies
-        // further away have a smaller impact on the fear decay
-        var surroundingBunnies = bunnies.Sum(bunny => {
-            return 1f - (this.transform.position - bunny.transform.position).magnitude / BUNNY_SEARCH_RADIUS;
-        });
-
-        if(state == State.CarryingBunny) {
-            // If we are carrying a bunny, we are _obviously_ petting it so should our fear should decay a little faster?
-            surroundingBunnies += 0.01f;
-        }
-
-        // Calculate the normalised sum of the fear levels of surrounding Peons. The fear from Peons that are further away have
-        // a smaller impact on the fear transfer rate
-        var surroundingFear = neighbours.Average(it => {
-            var neighbour = it.GetComponent<Peon>();
-            var normalisedDistance = (this.transform.position - neighbour.transform.position).magnitude / NEIGHBOUR_SEARCH_RADIUS;
-            return 1f - (neighbour.fear * normalisedDistance);
-        });
-
-        // If everyone around us is chill, we shouldn't try to match there fear, Only bunnies and time can reduce our fear-level;
-        if (surroundingFear > fear) {
-            fear = Mathf.Lerp(fear, surroundingFear, FEAR_TRANSFER_RATE * Time.deltaTime);
-            fear = Mathf.Clamp(fear, FEAR_MIN, FEAR_MAX);
-        } else {
-            // Decay fear based on how many bunnies are surrounding us
-            fear = Mathf.Lerp(fear, FEAR_MIN, (surroundingBunnies + FEAR_DECAY_RATE) * Time.deltaTime);
-        }
-    }
-
-    private bool isSufficientlyScaredToSacrifice() {
-        return fear >= FEAR_SACRIFICE_MIN && fear <= FEAR_SACRIFICE_MAX;
-    }
-
-    private bool shouldDropBunny() {
-        // TODO: Add Min/Max limits so that that the drop range is inside fear range?
-        return fear <= FEAR_SACRIFICE_MIN - BUNNY_DROP_BUFFER || fear >= FEAR_SACRIFICE_MAX + BUNNY_DROP_BUFFER;
-    }
-
-    void OnMouseDown() {
-        this.fear = FEAR_MAX;
-    }
-
-    public float GetFear() {
-        return fear;
     }
 }

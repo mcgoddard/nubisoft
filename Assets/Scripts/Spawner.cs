@@ -34,7 +34,7 @@ public class Spawner : MonoBehaviour
             timeSinceLastBunnySpawn += Time.deltaTime;
         }
 
-        UiUpdate.fear = peons.Average(peon => peon.GetComponent<Peon>().fear);
+        UiUpdate.fear = peons.Average(peon => peon.GetComponent<FearController>().GetFearLevel());
     }
 
     public void SpawnBunny(Vector3 position) {
