@@ -4,35 +4,74 @@ on:
     branches:
       - main
 jobs:
-  build:
+  build-windows:
     name: Windows Build
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
+    - name: Cache libraries
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-library
+        with:
+          path: Library
+          key: nubisoft-windows
+          restore-keys: |
+            nubisoft-
     - uses: game-ci/unity-builder@v2
       env:
         UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
       with:
         targetPlatform: StandaloneWindows64
+    - uses: actions/upload-artifact@v2
+      with:
+        name: windows-${{ github.sha }}
+        path: build/StandaloneWindows64
+  build-mac:
+    name: Mac Build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Cache libraries
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-library
+        with:
+          path: Library
+          key: nubisoft-mac
+          restore-keys: |
+            nubisoft-
     - uses: game-ci/unity-builder@v2
       env:
         UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
       with:
         targetPlatform: StandaloneOSX
+    - uses: actions/upload-artifact@v2
+      with:
+        name: mac-${{ github.sha }}
+        path: build/StandaloneOSX
+  build-linux:
+    name: Linux Build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Cache libraries
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-library
+        with:
+          path: Library
+          key: nubisoft-linux
+          restore-keys: |
+            nubisoft-
     - uses: game-ci/unity-builder@v2
       env:
         UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
       with:
         targetPlatform: StandaloneLinux64
-    - uses: actions/upload-artifact@v2
-      with:
-        name: windows-${{ github.sha }}
-        path: build/StandaloneWindows64
-    - uses: actions/upload-artifact@v2
-      with:
-        name: mac-${{ github.sha }}
-        path: build/StandaloneOSX
     - uses: actions/upload-artifact@v2
       with:
         name: linux-${{ github.sha }}
