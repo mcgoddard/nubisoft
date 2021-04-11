@@ -75,7 +75,7 @@ public class Peon : MonoBehaviour
                 } else if ((bunnyTarget.transform.position - transform.position).magnitude < CATCH_DISTANCE) {
                     // If we've caught it update our state and destroy the bunny object
                     GameObject.Destroy(bunnyTarget);
-                    if (fearController.fear <= 0.9f) {
+                    if (fearController.IsTerrified()) {
                         SetState(State.CarryingBunny);
                     } else {
                         UiUpdate.kills += 1;
@@ -87,7 +87,11 @@ public class Peon : MonoBehaviour
                 break;
             case State.CarryingBunny:
                 // If we've reached the alter start sacrificing
-                if ((transform.position - altar.transform.position).magnitude < SACRIFICE_DISTANCE) {
+                if (fearController.IsTerrified()) {
+                    // TODO: Kill the bunny in hand
+                    UiUpdate.kills += 1;
+                    SetState(State.Wandering);
+                } else if ((transform.position - altar.transform.position).magnitude < SACRIFICE_DISTANCE) {
                     SetState(State.Sacrifice);
                 } else if(fearController.ShouldDropBunny()) {
                     // We either calmed down too much or walk past a bunch of terrified people to the point that we forget what we were doing
@@ -110,7 +114,7 @@ public class Peon : MonoBehaviour
             case State.Wandering:
             default:
                 // TODO should we actually chase a rabbit?
-                if ((fearController.IsSufficientlyScaredToSacrifice() || fearController.fear >= 0.9f) && bunnies.Length > 0) {
+                if ((fearController.IsSufficientlyScaredToSacrifice() || fearController.IsTerrified()) && bunnies.Length > 0) {
                     bunnyTarget = bunnies[0]?.gameObject;
                     SetState(State.Chasing);
                 }
