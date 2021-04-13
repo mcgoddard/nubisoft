@@ -45,7 +45,7 @@ public class FearController : MonoBehaviour
             return; 
         }
 
-        var medianFear = neighbours
+        var maxFear = neighbours
             .Select(it => {
                 var neighbour = it.GetComponent<Peon>();
                 return neighbour.GetComponent<FearController>().GetFearLevel();
@@ -53,8 +53,8 @@ public class FearController : MonoBehaviour
             .DefaultIfEmpty(0f)
             .Max();
 
-        if (medianFear > fear) {
-            fear = Mathf.Lerp(fear, medianFear, fearTransferRate * Time.deltaTime);
+        if (maxFear > fear) {
+            fear = Mathf.Lerp(fear, maxFear, fearTransferRate * Time.deltaTime);
             fear = Mathf.Clamp(fear, FEAR_MIN, FEAR_MAX);
         } else {
             fear = Mathf.Lerp(fear, FEAR_MIN, (surroundingBunnies / 10) + BASE_FEAR_DECAY_RATE * Time.deltaTime);
