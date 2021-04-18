@@ -19,6 +19,7 @@ public class Peon : MonoBehaviour
     private GameObject bunnyTarget;
     private GameObject altar;
     private FearController fearController;
+    private UiUpdate uiUpdate;
     private float stateChangeTimeout = STATE_CHANGE_TIMEOUT;
     private float randomDirectionTimeout = RANDOM_DIRECTION_TIMEOUT;
     private new Rigidbody2D rigidbody;
@@ -36,6 +37,7 @@ public class Peon : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        uiUpdate = GameObject.Find("UI").GetComponent<UiUpdate>();
         fearController = GetComponent<FearController>();
         rigidbody = GetComponent<Rigidbody2D>();
         altar = GameObject.Find("Altar");
@@ -77,7 +79,7 @@ public class Peon : MonoBehaviour
                     GameObject.Destroy(bunnyTarget);
                     if (fearController.IsTerrified()) {
                         // Just kill it and go back to wandering
-                        UiUpdate.kills += 1;
+                        uiUpdate.kills += 1;
                         SetState(State.Wandering);
                     } else {
                         SetState(State.CarryingBunny);
@@ -91,7 +93,7 @@ public class Peon : MonoBehaviour
                 // If we've reached the alter start sacrificing
                 if (fearController.IsTerrified()) {
                     // TODO: Kill the bunny in hand
-                    UiUpdate.kills += 1;
+                    uiUpdate.kills += 1;
                     SetState(State.Wandering);
                 } else if ((transform.position - altar.transform.position).magnitude < SACRIFICE_DISTANCE) {
                     SetState(State.Sacrifice);
@@ -107,8 +109,8 @@ public class Peon : MonoBehaviour
             case State.Sacrifice:
                 // If we're done sacrificing go back to wandering
                 if (stateChangeTimeout < 0) {
-                    UiUpdate.sacrifices += 1;
-                    UiUpdate.bunnies -= 1;
+                    uiUpdate.sacrifices += 1;
+                    uiUpdate.bunnies -= 1;
                     SetRandomTarget();
                     SetState(State.Wandering);
                 }

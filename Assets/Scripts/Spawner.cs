@@ -14,9 +14,11 @@ public class Spawner : MonoBehaviour
     private const float BUNNY_SPAWN_RATE = 0.25f;
     private float timeSinceLastBunnySpawn = 0f;
     private GameObject[] peons;
+    private UiUpdate uiUpdate;
 
     void Start()
     {
+        uiUpdate = GameObject.Find("UI").GetComponent<UiUpdate>();
         mapBounds = new Bounds(Vector3.zero, new Vector3(MAP_SIZE, MAP_SIZE, 0));
         Random.InitState((int)System.DateTime.Now.Ticks);
         peons = Enumerable
@@ -39,13 +41,13 @@ public class Spawner : MonoBehaviour
                 var offset = Random.insideUnitCircle / 10;
                 var spawnLocation = mousePosition + new Vector3(offset.x, offset.y, 0);
                 SpawnBunny(spawnLocation);
-                UiUpdate.bunnies += 1;
+                uiUpdate.bunnies += 1;
             }
 
             timeSinceLastBunnySpawn = BUNNY_SPAWN_RATE;
         }
 
-        UiUpdate.fear = peons.Average(peon => peon.GetComponent<FearController>().GetFearLevel());
+        uiUpdate.fear = peons.Average(peon => peon.GetComponent<FearController>().GetFearLevel());
     }
 
     public void SpawnBunny(Vector3 position)
