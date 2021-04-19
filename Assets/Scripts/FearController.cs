@@ -15,7 +15,6 @@ public class FearController : MonoBehaviour
     private const float FEAR_SACRIFICE_MIN = 0.4f;
     private const float BUNNY_DROP_BUFFER = 0.2f;
     public float fear;
-    private bool isCarryingBunny = false;
 
     private float fearTransferRate;
 
