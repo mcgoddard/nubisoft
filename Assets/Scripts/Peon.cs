@@ -15,11 +15,12 @@ public class Peon : MonoBehaviour
     public LayerMask bunniesLayer;
     public State state = State.Grouping;
     public Vector2 target;
-    public bool move = true;
+    public bool move = false;
     private GameObject bunnyTarget;
     private GameObject altar;
     private FearController fearController;
     private UiUpdate uiUpdate;
+    private Animator animator;
     private float stateChangeTimeout = STATE_CHANGE_TIMEOUT;
     private float randomDirectionTimeout = RANDOM_DIRECTION_TIMEOUT;
     private new Rigidbody2D rigidbody;
@@ -41,6 +42,7 @@ public class Peon : MonoBehaviour
         fearController = GetComponent<FearController>();
         rigidbody = GetComponent<Rigidbody2D>();
         altar = GameObject.Find("Altar");
+        animator = this.GetComponent<Animator>();
         if (Random.value < 0.5) {
             state = State.Grouping;
         } else {
@@ -82,6 +84,7 @@ public class Peon : MonoBehaviour
                         uiUpdate.kills += 1;
                         SetState(State.Wandering);
                     } else {
+                        this.animator.SetTrigger("CarryingBunny");
                         SetState(State.CarryingBunny);
                     }
                 } else {
@@ -91,14 +94,12 @@ public class Peon : MonoBehaviour
                 break;
             case State.CarryingBunny:
                 // If we've reached the alter start sacrificing
-                if (fearController.IsTerrified()) {
-                    // TODO: Kill the bunny in hand
-                    uiUpdate.kills += 1;
-                    SetState(State.Wandering);
-                } else if ((transform.position - altar.transform.position).magnitude < SACRIFICE_DISTANCE) {
+                if ((transform.position - altar.transform.position).magnitude < SACRIFICE_DISTANCE) {
                     SetState(State.Sacrifice);
+                    this.animator.SetTrigger("DroppedBunny");
                 } else if(fearController.ShouldDropBunny()) {
                     // We either calmed down too much or walk past a bunch of terrified people to the point that we forget what we were doing
+                    this.animator.SetTrigger("DroppedBunny");
                     this.SetState(State.Wandering);
                     this.transform.parent.GetComponent<Spawner>()?.SpawnBunny(this.transform.position);
                 } else {
@@ -113,6 +114,7 @@ public class Peon : MonoBehaviour
                     uiUpdate.bunnies -= 1;
                     SetRandomTarget();
                     SetState(State.Wandering);
+                    this.animator.SetTrigger("DroppedBunny");
                 }
                 break;
             case State.Wandering:
@@ -132,7 +134,7 @@ public class Peon : MonoBehaviour
                         // Perhaps turn slightly if we're walking alone
                         if (neighbours.Length == 1) {
                             target = target + new Vector2(Random.value * 2, Random.value * 2);
-                            move = true;
+                            SetMoving(true);
                         } else {
                             // Or if there are people nearby walk away from their centrepoint
                             SetAntiGroupTarget(neighbours);
@@ -143,7 +145,7 @@ public class Peon : MonoBehaviour
                         // We're not going to change direction, so just ensure we haven't reached our target
                         randomDirectionTimeout -= Time.deltaTime;
                         target = (Vector2)transform.position + ((target - (Vector2)transform.position).normalized * 10f);
-                        move = true;
+                        SetMoving(true);
                     }
                 }
                 break;
@@ -165,7 +167,7 @@ public class Peon : MonoBehaviour
     void SetGroupTarget(Collider2D[] neighbours) {
         Vector2 total = neighbours.Aggregate(new Vector3(), (a, n) => n.gameObject.transform.position + a);
         Vector2 centrePoint = total/neighbours.Length;
-        move = !((centrePoint - (Vector2)transform.position).magnitude < GROUP_STANDOFF_DISTANCE);
+        SetMoving(!((centrePoint - (Vector2)transform.position).magnitude < GROUP_STANDOFF_DISTANCE));
         target = centrePoint;
     }
 
@@ -174,14 +176,14 @@ public class Peon : MonoBehaviour
         Vector2 total = neighbours.Aggregate(new Vector3(), (a, n) => n.gameObject.transform.position + a);
         Vector2 centrePoint = total/neighbours.Length;
         var direction = (centrePoint - (Vector2)transform.position) * -10.0f;
-        move = true;
+        SetMoving(true);
         target = direction;
     }
 
     // Set a random target location
     void SetRandomTarget() {
         target = (Vector2)transform.position + new Vector2(Random.Range(-5f, 5f), Random.Range(-5f, 5f));
-        move = true;
+        SetMoving(true);
     }
 
     // Get the colliders for nearby Peons (your neighbours)
@@ -204,5 +206,10 @@ public class Peon : MonoBehaviour
     float plusMinusPercent(float original, float percent) {
         float twentyPercent = original * ((percent * 2) / 100);
         return original + (Random.value * twentyPercent) - (twentyPercent / 2.0f);
+    }
+
+    void SetMoving(bool move) {
+        this.move = move;
+        this.animator.SetBool("Moving", move);
     }
 }
