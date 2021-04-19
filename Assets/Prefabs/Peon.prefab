@@ -109,6 +109,7 @@ GameObject:
   - component: {fileID: 1778576840}
   - component: {fileID: 8734758826331196684}
   - component: {fileID: -9034651373678430050}
+  - component: {fileID: 8911717556896501961}
   m_Layer: 3
   m_Name: Peon
   m_TagString: Peons
@@ -258,3 +259,23 @@ MonoBehaviour:
   bunniesLayer:
     serializedVersion: 2
     m_Bits: 64
+  fear: 0
+--- !u!95 &8911717556896501961
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8465588287610908916}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: debee96d056e0dac5b90c22a3b4fbb47, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
