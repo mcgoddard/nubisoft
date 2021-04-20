@@ -237,6 +237,40 @@ MonoBehaviour:
   - {fileID: 8300000, guid: f91334ec0649d6828ab5fb9bf66e6741, type: 3}
   - {fileID: 8300000, guid: 7b2ee63ce20a4e781afc3c4c8cc05276, type: 3}
   - {fileID: 8300000, guid: 1c12ae3d24e0da1719979cbace365c4e, type: 3}
+  threatSamples:
+  - {fileID: 8300000, guid: 0d0ed8ee217608739bbf8df62199e32a, type: 3}
+  - {fileID: 8300000, guid: 5e66433266d28b71b9f131fb227f3b9e, type: 3}
+  - {fileID: 8300000, guid: fb7a03962e4653fb8995ff892c7a38ee, type: 3}
+  - {fileID: 8300000, guid: 2f8e262082e846615a2213476962f778, type: 3}
+  - {fileID: 8300000, guid: 3fb6f429c52a860aebe97bd588842832, type: 3}
+  - {fileID: 8300000, guid: 8ffab7ac9ae84ef2583a34ecd4474bff, type: 3}
+  confusedSamples:
+  - {fileID: 8300000, guid: 41b754cd3b20cd3a5948a59275431d1b, type: 3}
+  - {fileID: 8300000, guid: 2a46bb64c5f3135038966b8fe098df0c, type: 3}
+  - {fileID: 8300000, guid: 7cb7efd5bf469b1deb7fa0a98c8a396b, type: 3}
+  - {fileID: 8300000, guid: e9ddd181adcf99200ba45efcc2e6b14e, type: 3}
+  - {fileID: 8300000, guid: c1eac1219affeafd6ac99fa3b1ffca50, type: 3}
+  tetchySamples:
+  - {fileID: 8300000, guid: cfdd732f4a72cca57ba902caf8cf61ec, type: 3}
+  - {fileID: 8300000, guid: c8002828f76e849b38221111a665a986, type: 3}
+  - {fileID: 8300000, guid: 59dbe8af5a7cb040d9ef09c93a2c3062, type: 3}
+  - {fileID: 8300000, guid: 3e1bee9a49d7283ffa71bf8e9c6c5d0d, type: 3}
+  - {fileID: 8300000, guid: 994186c0d56a6ece182909cd4d4ed02a, type: 3}
+  hmmSamples:
+  - {fileID: 8300000, guid: 0e406d555c4ea8a6c8c7c216c759aa43, type: 3}
+  - {fileID: 8300000, guid: d066eb1d33c1f2ce6a1d1eee378b08e8, type: 3}
+  - {fileID: 8300000, guid: 0a92c2ca29676783b9cfaf8d79482335, type: 3}
+  - {fileID: 8300000, guid: 876ce9e9fd1f7d51a9bc4ca1962e51dd, type: 3}
+  - {fileID: 8300000, guid: 5b250d5b9d4132f1cb497832f0c33f15, type: 3}
+  - {fileID: 8300000, guid: e7981866bacd30163868e3e7fced5e6b, type: 3}
+  whistlingSamples:
+  - {fileID: 8300000, guid: c0ff90c88f4c61f0682d7d92e202298f, type: 3}
+  - {fileID: 8300000, guid: fa150ab372368228684daf51705100c7, type: 3}
+  - {fileID: 8300000, guid: 10e14154fdc74e481a4db7744a95fab3, type: 3}
+  - {fileID: 8300000, guid: 6ccaeaed8413b09749a3a40e00d3961a, type: 3}
+  - {fileID: 8300000, guid: 77d7a0a0f0c8baa249f868b99502fe37, type: 3}
+  - {fileID: 8300000, guid: 69a075a27203aec518aebb3f741fc59f, type: 3}
+  - {fileID: 8300000, guid: 0475dcb66193ba660a8386a436e20a45, type: 3}
   bloodSplatDecal: {fileID: 8122061277847696965, guid: a67b08d532491b40891763b5fcb42ddd, type: 3}
 --- !u!58 &1778576840
 CircleCollider2D:
