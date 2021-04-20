@@ -94,14 +94,17 @@ public class Peon : MonoBehaviour
                 break;
             case State.CarryingBunny:
                 // If we've reached the alter start sacrificing
-                if ((transform.position - altar.transform.position).magnitude < SACRIFICE_DISTANCE) {
+                
+                if (altar.GetComponent<Renderer>().bounds.Contains(transform.position)) {
                     SetState(State.Sacrifice);
                     this.animator.SetTrigger("DroppedBunny");
-                } else if(fearController.ShouldDropBunny()) {
-                    // We either calmed down too much or walk past a bunch of terrified people to the point that we forget what we were doing
-                    this.animator.SetTrigger("DroppedBunny");
-                    this.SetState(State.Wandering);
-                    this.transform.parent.GetComponent<Spawner>()?.SpawnBunny(this.transform.position);
+                    this.animator.SetBool("Moving", false);
+                    this.stateChangeTimeout = 30f; // 30 seconds to perform sacrifice
+               } else if(fearController.ShouldDropBunny()) {
+                   // We either calmed down too much or walk past a bunch of terrified people to the point that we forget what we were doing
+                   this.animator.SetTrigger("DroppedBunny");
+                   this.SetState(State.Wandering);
+                   this.transform.parent.GetComponent<Spawner>()?.SpawnBunny(this.transform.position);
                 } else {
                     // Otherwise keep aiming for the altar
                     target = altar.transform.position;
@@ -123,6 +126,11 @@ public class Peon : MonoBehaviour
                 if ((fearController.IsSufficientlyScaredToSacrifice() || fearController.IsTerrified()) && bunnies.Length > 0) {
                     bunnyTarget = bunnies[0]?.gameObject;
                     SetState(State.Chasing);
+                }
+                // We should stay away from the alter where people are sacrificing  bunnies. Not a pleasant place to hang out.
+                else if (neighbours.Any(neighbour => neighbour.GetComponent<Peon>()?.state == State.Sacrifice)) {
+                    SetAntiGroupTarget(neighbours);
+                    SetState(State.Wandering);
                 }
                 // If we've got some neighbours and are ready to finish wandering form a group with those neighbours
                 // This will result in following that neighbour if they aren't ready to group yet
