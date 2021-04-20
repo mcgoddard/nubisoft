@@ -231,6 +231,13 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 57bf6dfeffc759f0fb249c16ef314357, type: 3}
   - {fileID: 8300000, guid: e73416d29a0b7b98a93c442af4f9a377, type: 3}
   - {fileID: 8300000, guid: 5685760583891646dbbd9b0e200ead34, type: 3}
+  sacrificeSamples:
+  - {fileID: 8300000, guid: 57e0e1e45c892be7795d65def3477e1e, type: 3}
+  - {fileID: 8300000, guid: 0d3a43f534c6aa5bc89ef0eeefe33943, type: 3}
+  - {fileID: 8300000, guid: f91334ec0649d6828ab5fb9bf66e6741, type: 3}
+  - {fileID: 8300000, guid: 7b2ee63ce20a4e781afc3c4c8cc05276, type: 3}
+  - {fileID: 8300000, guid: 1c12ae3d24e0da1719979cbace365c4e, type: 3}
+  bloodSplatDecal: {fileID: 8122061277847696965, guid: a67b08d532491b40891763b5fcb42ddd, type: 3}
 --- !u!58 &1778576840
 CircleCollider2D:
   m_ObjectHideFlags: 0
