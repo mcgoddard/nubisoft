@@ -35,10 +35,18 @@ public class Peon : MonoBehaviour
     private const float SACRIFICE_DISTANCE = 0.5f;
     private const float NEIGHBOUR_SEARCH_RADIUS = 2f;
     private const float BUNNY_SEARCH_RADIUS = 1f;
+    private const float VOICE_LINE_TIMEOUT = 30f;
+    private float timeToNextVoiceLine;
     private AudioSource audioSource;
     public AudioClip[] chantSamples;
     public AudioClip[] sacrificeSamples;
+    public AudioClip[] threatSamples;
+    public AudioClip[] confusedSamples;
+    public AudioClip[] tetchySamples;
+    public AudioClip[] hmmSamples;
+    public AudioClip[] whistlingSamples;
     public GameObject bloodSplatDecal;
+
 
     // Start is called before the first frame update
     void Awake()
@@ -49,6 +57,7 @@ public class Peon : MonoBehaviour
         altar = GameObject.Find("Altar");
         animator = this.GetComponent<Animator>();
         audioSource = this.GetComponent<AudioSource>();
+        timeToNextVoiceLine = plusMinusPercent(VOICE_LINE_TIMEOUT, 100);
 
         if (Random.value < 0.5) {
             state = State.Grouping;
@@ -178,24 +187,77 @@ public class Peon : MonoBehaviour
         }
         stateChangeTimeout -= Time.deltaTime;
 
-        if (state == State.Sacrifice) {
-            TriggerSacrificeSamples();
+        UpdateAudioState();
+
+    }
+
+    void UpdateAudioState() {
+        switch (state)
+        {
+            case State.Sacrifice:
+                TriggerSacrificeSamples();
+                break;
+            default:
+                TriggerCasualAudio();
+                break;
         }
 
         UpdateAudioSourceVolume();
     }
+
+    void TriggerCasualAudio() {
+        timeToNextVoiceLine -= Time.deltaTime;
+
+        if (timeToNextVoiceLine >= 0 || Random.value < 0.90) return;
+
+        timeToNextVoiceLine = plusMinusPercent(VOICE_LINE_TIMEOUT, 90);
+
+        var neighbours = GetNeighbours();
+        var bunnies = GetBunnies();
+
+        if (fearController.IsTerrified() || state == State.Chasing && neighbours.Length > 0 && bunnies.Length > 0)  {
+            audioSource.PlayOneShot(PickOne(threatSamples));
+            return;
+        }
+
+        if (state == State.Wandering) {
+            if (Random.value > 0.9) {
+                audioSource.PlayOneShot(PickOne(whistlingSamples));
+            }
+            return;
+        }
+
+        if (state == State.Grouping) {
+            var hasTerrifiedNeigbour = neighbours.Any(neighbour => (bool)(neighbour.GetComponent<FearController>()?.IsTerrified()));
+            var hasNeighbourChasing = neighbours.Any(neighbour => (bool)(neighbour.GetComponent<Peon>().state == State.Chasing));
+
+            if (hasTerrifiedNeigbour)
+            {
+                audioSource.PlayOneShot(PickOne(tetchySamples));
+            }
+            else if (hasNeighbourChasing)
+            {
+                audioSource.PlayOneShot(PickOne(confusedSamples));
+            }
+            else
+            {
+                audioSource.PlayOneShot(PickOne(hmmSamples));
+            }
+        }
+
+    }
      
     void TriggerSacrificeSamples() {
         if (!audioSource.isPlaying) {
-            var chantSample = chantSamples[Random.Range(0, chantSamples.Length)];
+            var chantSample = PickOne(chantSamples);
 
             this.audioSource.PlayOneShot(chantSample);
-            StartCoroutine(PlaySacrificeSoundAfter());
+            StartCoroutine(PlaySacrificeSounds());
         }
     }
 
     void KillBunny() {
-        var sacrificeSample = sacrificeSamples[Random.Range(0, sacrificeSamples.Length)];
+        var sacrificeSample = PickOne(sacrificeSamples);
         this.audioSource.PlayOneShot(sacrificeSample);
         var position = transform.position + (transform.right / 3) + Random.insideUnitSphere / 3;
         position.z = transform.position.z;
@@ -203,7 +265,7 @@ public class Peon : MonoBehaviour
         Instantiate(bloodSplatDecal, position, Quaternion.AngleAxis(rotation, Vector3.forward));
     }
 
-    IEnumerator PlaySacrificeSoundAfter() {
+    IEnumerator PlaySacrificeSounds() {
         // We _may_ have stopped sacrifing since we triggered this co-routine
         while (state == State.Sacrifice) {
             yield return new WaitForSeconds(Random.Range(1f, 5.0f));
@@ -223,14 +285,6 @@ public class Peon : MonoBehaviour
         var viewportCoords = Camera.main.WorldToViewportPoint(transform.position);
         var distanceFromCenter = (viewportCoords - viewportCenter).magnitude;
         var volumeFromScreenSpace = 1.0f - (distanceFromCenter * 2);
-
-        Debug.LogFormat("viewportCenter: {3}, viewPortCoords: {0}, distanceFromCenter: {1}, volumeFromScreenSpace: {2}",
-            viewportCoords,
-            distanceFromCenter,
-            volumeFromScreenSpace,
-            viewportCenter
-        );
-
 
         var volumeFromZoom = Mathf.Max(0.1f, 1.0f - Camera.main.GetComponent<CameraControls>().GetZoomLevel());
 
@@ -288,5 +342,9 @@ public class Peon : MonoBehaviour
     void SetMoving(bool move) {
         this.move = move;
         this.animator.SetBool("Moving", move);
+    }
+
+    T PickOne<T>(T[] array) {
+        return array[Random.Range(0, array.Length)];
     }
 }
