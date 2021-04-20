@@ -208,6 +208,7 @@ public class Peon : MonoBehaviour
         return original + (Random.value * twentyPercent) - (twentyPercent / 2.0f);
     }
 
+
     void SetMoving(bool move) {
         this.move = move;
         this.animator.SetBool("Moving", move);
