@@ -62,4 +62,10 @@ public class CameraControls : MonoBehaviour
     {
         return Camera.main.ScreenToWorldPoint(Input.mousePosition);
     }
+
+    public float GetZoomLevel() {
+        var zoomLevel = (this.camera.orthographicSize - MIN_ZOOM_LEVEL) / (MAX_ZOOM_LEVEL - MIN_ZOOM_LEVEL);
+        Debug.Assert(zoomLevel >= 0 && zoomLevel <= 1.0);
+        return zoomLevel;
+    }
 }

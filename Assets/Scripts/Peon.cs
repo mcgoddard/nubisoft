@@ -34,15 +34,19 @@ public class Peon : MonoBehaviour
     private const float SACRIFICE_DISTANCE = 0.5f;
     private const float NEIGHBOUR_SEARCH_RADIUS = 2f;
     private const float BUNNY_SEARCH_RADIUS = 1f;
+    private AudioSource audioSource;
+    public AudioClip[] chantSamples;
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
-        uiUpdate = GameObject.Find("UI").GetComponent<UiUpdate>();
+        uiUpdate = GameObject.Find("UI")?.GetComponent<UiUpdate>();
         fearController = GetComponent<FearController>();
         rigidbody = GetComponent<Rigidbody2D>();
         altar = GameObject.Find("Altar");
         animator = this.GetComponent<Animator>();
+        audioSource = this.GetComponent<AudioSource>();
+
         if (Random.value < 0.5) {
             state = State.Grouping;
         } else {
@@ -169,6 +173,42 @@ public class Peon : MonoBehaviour
             rigidbody.velocity = new Vector2(0, 0);
         }
         stateChangeTimeout -= Time.deltaTime;
+
+        if (state == State.Sacrifice && !audioSource.isPlaying && chantSamples.Length != 0) {
+            var sampleIndex = Random.Range(0, chantSamples.Length);
+            this.audioSource.PlayOneShot(chantSamples[sampleIndex]);
+        }
+
+        UpdateAudioSourceVolume();
+    }
+
+    void UpdateAudioSourceVolume() {
+        if (!audioSource.isPlaying) return;
+
+        if (!GetComponent<Renderer>().isVisible) {
+            this.audioSource.volume = 0;
+            return;
+        }
+
+        var viewportCenter = new Vector3(0.5f, 0.5f, -Camera.main.transform.position.z);
+        var viewportCoords = Camera.main.WorldToViewportPoint(transform.position);
+        var distanceFromCenter = (viewportCoords - viewportCenter).magnitude;
+        var volumeFromScreenSpace = 1.0f - (distanceFromCenter * 2);
+
+        Debug.LogFormat("viewportCenter: {3}, viewPortCoords: {0}, distanceFromCenter: {1}, volumeFromScreenSpace: {2}",
+            viewportCoords,
+            distanceFromCenter,
+            volumeFromScreenSpace,
+            viewportCenter
+        );
+
+
+        var volumeFromZoom = Mathf.Max(0.1f, 1.0f - Camera.main.GetComponent<CameraControls>().GetZoomLevel());
+
+        Debug.LogFormat("volumeFromZoom: {0}, volumeFromScreenSpace: {1}", volumeFromZoom, volumeFromScreenSpace);
+        // We need to clamp, because part of the sprite be visble on screen but the centre position is offscreen
+        // We also make the at least remotely audible if they are on screen
+        this.audioSource.volume = Mathf.Clamp(volumeFromZoom * volumeFromScreenSpace, 0.05f, 1.0f);
     }
 
     // Move towards the centrepoint of your neighbours, but don't get too close to the centre
