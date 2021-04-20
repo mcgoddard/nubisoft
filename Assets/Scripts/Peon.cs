@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Linq;
 using UnityEngine;
 
@@ -36,6 +37,8 @@ public class Peon : MonoBehaviour
     private const float BUNNY_SEARCH_RADIUS = 1f;
     private AudioSource audioSource;
     public AudioClip[] chantSamples;
+    public AudioClip[] sacrificeSamples;
+    public GameObject bloodSplatDecal;
 
     // Start is called before the first frame update
     void Awake()
@@ -86,6 +89,7 @@ public class Peon : MonoBehaviour
                     if (fearController.IsTerrified()) {
                         // Just kill it and go back to wandering
                         uiUpdate.kills += 1;
+                        KillBunny();
                         SetState(State.Wandering);
                     } else {
                         this.animator.SetTrigger("CarryingBunny");
@@ -174,12 +178,37 @@ public class Peon : MonoBehaviour
         }
         stateChangeTimeout -= Time.deltaTime;
 
-        if (state == State.Sacrifice && !audioSource.isPlaying && chantSamples.Length != 0) {
-            var sampleIndex = Random.Range(0, chantSamples.Length);
-            this.audioSource.PlayOneShot(chantSamples[sampleIndex]);
+        if (state == State.Sacrifice) {
+            TriggerSacrificeSamples();
         }
 
         UpdateAudioSourceVolume();
+    }
+     
+    void TriggerSacrificeSamples() {
+        if (!audioSource.isPlaying) {
+            var chantSample = chantSamples[Random.Range(0, chantSamples.Length)];
+
+            this.audioSource.PlayOneShot(chantSample);
+            StartCoroutine(PlaySacrificeSoundAfter());
+        }
+    }
+
+    void KillBunny() {
+        var sacrificeSample = sacrificeSamples[Random.Range(0, sacrificeSamples.Length)];
+        this.audioSource.PlayOneShot(sacrificeSample);
+        var position = transform.position + (transform.right / 3) + Random.insideUnitSphere / 3;
+        position.z = transform.position.z;
+        var rotation = Random.value;
+        Instantiate(bloodSplatDecal, position, Quaternion.AngleAxis(rotation, Vector3.forward));
+    }
+
+    IEnumerator PlaySacrificeSoundAfter() {
+        // We _may_ have stopped sacrifing since we triggered this co-routine
+        while (state == State.Sacrifice) {
+            yield return new WaitForSeconds(Random.Range(1f, 5.0f));
+            KillBunny();
+        }
     }
 
     void UpdateAudioSourceVolume() {
@@ -207,8 +236,7 @@ public class Peon : MonoBehaviour
 
         Debug.LogFormat("volumeFromZoom: {0}, volumeFromScreenSpace: {1}", volumeFromZoom, volumeFromScreenSpace);
         // We need to clamp, because part of the sprite be visble on screen but the centre position is offscreen
-        // We also make the at least remotely audible if they are on screen
-        this.audioSource.volume = Mathf.Clamp(volumeFromZoom * volumeFromScreenSpace, 0.05f, 1.0f);
+        this.audioSource.volume = Mathf.Clamp(volumeFromZoom * volumeFromScreenSpace, 0.0f, 1.0f);
     }
 
     // Move towards the centrepoint of your neighbours, but don't get too close to the centre
