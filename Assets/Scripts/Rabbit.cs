@@ -68,7 +68,6 @@ public class Rabbit : MonoBehaviour
 
     private void TriggerJumpAnimation() {
         var direction = this.transform.eulerAngles.z;
-        Debug.Log("Rotation: " + direction);
         if (direction > 45 && direction <= 135)
             SetTrigger(AnimationState.HopUp);
         else if (direction > 135 && direction <= 225)
