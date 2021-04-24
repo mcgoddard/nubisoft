@@ -9,7 +9,7 @@ public class Spawner : MonoBehaviour
     public GameObject peonPrefab;
     public GameObject bunnyPrefab;
     public int peonCount = 50;
-    private const float MAP_SIZE = 20.0f;
+    private const float MAP_SIZE = 18.0f;
     private Bounds mapBounds;
     private const float BUNNY_SPAWN_RATE = 0.25f;
     private float timeSinceLastBunnySpawn = 0f;

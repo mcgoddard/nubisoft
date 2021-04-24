@@ -10,7 +10,7 @@ public class UiUpdate : MonoBehaviour
     // Start is called before the first frame update
     public int targetSacrificies;
     public int currentLevel;
-    private static string[] sceneNames = { "Game", "Level2", "Level3", "Level4", "Level5" };
+    private static string[] sceneNames = { "Level1", "Level2", "Level3", "Level4", "Level5" };
     private int _sacrifices;
     public int sacrifices
     {

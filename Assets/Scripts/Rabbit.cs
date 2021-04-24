@@ -79,7 +79,6 @@ public class Rabbit : MonoBehaviour
     }
 
     private void SetTrigger(AnimationState state) {
-        Debug.Log("Triggering " + state.ToString());
         animator.SetInteger("State", (int)state);
     }
 }

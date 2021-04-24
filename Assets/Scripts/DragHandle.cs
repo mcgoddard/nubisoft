@@ -12,7 +12,6 @@ public class DragHandle : MonoBehaviour
     }
 
     void OnMouseDrag() {
-        Debug.Log($"Dragging: {this.GetInstanceID()}");
         UnitSelector.Drag(collider);
     }
 

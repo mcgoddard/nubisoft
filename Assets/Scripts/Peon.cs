@@ -28,7 +28,7 @@ public class Peon : MonoBehaviour
     private const float SPEED = 1f;
     private const float ROTATION_SPEED = 1f;
     private const float STATE_CHANGE_TIMEOUT = 15.0f;
-    private const float MAP_SIZE = 20.0f;
+    private const float MAP_SIZE = 18.0f;
     private const float RANDOM_DIRECTION_TIMEOUT = 10.0f;
     private const float GROUP_STANDOFF_DISTANCE = 0.5f;
     private const float CATCH_DISTANCE = 0.3f;
@@ -132,7 +132,8 @@ public class Peon : MonoBehaviour
                 if (stateChangeTimeout < 0) {
                     uiUpdate.sacrifices += 1;
                     uiUpdate.bunnies -= 1;
-                    SetRandomTarget();
+                    target = (Vector2)transform.position + ((Vector2)transform.position - (Vector2)altar.transform.position);
+                    SetMoving(true);
                     SetState(State.Wandering);
                     this.animator.SetTrigger("DroppedBunny");
                 }
@@ -158,7 +159,7 @@ public class Peon : MonoBehaviour
                     if (randomDirectionTimeout < 0.0f) {
                         // Perhaps turn slightly if we're walking alone
                         if (neighbours.Length == 1) {
-                            target = target + new Vector2(Random.value * 2, Random.value * 2);
+                            target = target + new Vector2(Random.value * 0.1f, Random.value * 0.1f);
                             SetMoving(true);
                         } else {
                             // Or if there are people nearby walk away from their centrepoint
@@ -169,8 +170,16 @@ public class Peon : MonoBehaviour
                     } else {
                         // We're not going to change direction, so just ensure we haven't reached our target
                         randomDirectionTimeout -= Time.deltaTime;
-                        target = (Vector2)transform.position + ((target - (Vector2)transform.position).normalized * 10f);
+                        target = (Vector2)transform.position + ((target - (Vector2)transform.position).normalized);
                         SetMoving(true);
+                        // Turn if our target is outside the play area
+                        var upperMapBoundry = MAP_SIZE / 2.0f;
+                        var lowerMapBoundry = upperMapBoundry * -1.0f;
+                        if (target.x > upperMapBoundry || target.x < lowerMapBoundry || target.y > upperMapBoundry || target.y < lowerMapBoundry) {
+                            Vector3 targetDirection = target - (Vector2)transform.position;
+                            Quaternion rotationToNewTarget = Quaternion.AngleAxis(90, Vector3.forward);
+                            target = rotationToNewTarget * targetDirection;
+                        }
                     }
                 }
                 break;
@@ -288,7 +297,6 @@ public class Peon : MonoBehaviour
 
         var volumeFromZoom = Mathf.Max(0.1f, 1.0f - Camera.main.GetComponent<CameraControls>().GetZoomLevel());
 
-        Debug.LogFormat("volumeFromZoom: {0}, volumeFromScreenSpace: {1}", volumeFromZoom, volumeFromScreenSpace);
         // We need to clamp, because part of the sprite be visble on screen but the centre position is offscreen
         this.audioSource.volume = Mathf.Clamp(volumeFromZoom * volumeFromScreenSpace, 0.0f, 1.0f);
     }
