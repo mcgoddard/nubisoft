@@ -6,6 +6,7 @@ using UnityEngine;
 public class CameraControls : MonoBehaviour
 {
     private Bounds cameraBounds;
+    public bool EnableEdgeScrolling = false;
     private const int EDGE_PAN_BUFFER = 100;
     private const float CAMERA_PAN_SPEED = 10;
     private const float MIN_ZOOM_LEVEL = 3.5f;
@@ -39,7 +40,7 @@ public class CameraControls : MonoBehaviour
 
             // Update to the current mouse position so we so we can compute the new delta on the next frame
             middleMouseDownPosition = Input.mousePosition;
-        } else {
+        } else if (EnableEdgeScrolling) {
             // Handle edge pan base on mouse position
             if (Input.mousePosition.y >= Screen.height - EDGE_PAN_BUFFER) {
                 transform.position += Vector3.up * CAMERA_PAN_SPEED * Time.deltaTime;
