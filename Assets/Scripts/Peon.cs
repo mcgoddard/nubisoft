@@ -31,7 +31,7 @@ public class Peon : MonoBehaviour
     private const float STATE_CHANGE_TIMEOUT = 15.0f;
     private const float MAP_SIZE = 18.0f;
     private const float RANDOM_DIRECTION_TIMEOUT = 10.0f;
-    private const float GROUP_STANDOFF_DISTANCE = 0.5f;
+    private const float GROUP_STANDOFF_DISTANCE = 1.0f;
     private const float CATCH_DISTANCE = 0.3f;
     private const float SACRIFICE_DISTANCE = 0.5f;
     private const float NEIGHBOUR_SEARCH_RADIUS = 2f;
@@ -393,7 +393,7 @@ public class Peon : MonoBehaviour
         // heading to the next point. If it's our last waypoint we return
         // our current position so that our caller can perfrom strict equality
         // to know we've arrived.
-        if (Vector3.Distance(current, transform.position) < 0.01) {
+        if (Vector3.Distance(current, transform.position) < 0.1f) {
             path.RemoveAt(0);
             return path.Count > 0 ? path.First() : transform.position;
         }
