@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
@@ -78,8 +76,16 @@ public class UiUpdate : MonoBehaviour
             if (fadeOutTimer >= OUT_FADE_TIME)
             {
                 PlayerPrefs.SetFloat(timePrefsKey, time);
-                var nextSceneName = sceneNames[currentLevel + 1];
-                SceneManager.LoadScene(nextSceneName, LoadSceneMode.Single);
+                if (currentLevel + 1 < sceneNames.Length)
+                {
+                    var nextSceneName = sceneNames[currentLevel + 1];
+                    SceneManager.LoadScene(nextSceneName, LoadSceneMode.Single);
+                }
+                else
+                {
+                    // We're already on the final level, head to the victory screen
+                    SceneManager.LoadScene("End", LoadSceneMode.Single);
+                }
             }
             else
             {
