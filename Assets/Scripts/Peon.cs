@@ -197,7 +197,10 @@ public class Peon : MonoBehaviour
         stateChangeTimeout -= Time.deltaTime;
 
         UpdateAudioState();
-
+        if (uiUpdate.fadingOut)
+        {
+            audioSource.mute = true;
+        }
     }
 
     void UpdateAudioState() {
