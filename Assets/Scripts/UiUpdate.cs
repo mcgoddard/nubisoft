@@ -20,6 +20,7 @@ public class UiUpdate : MonoBehaviour
             if (_sacrifices >= targetSacrificies) {
                 if (currentLevel < sceneNames.Length) {
                     fadingOut = true;
+                    victoryMusic.Play();
                 }
                 else
                 {
@@ -43,14 +44,19 @@ public class UiUpdate : MonoBehaviour
     private Text bunniesText;
     private Text timeText;
     private Image fadeOut;
+    private AudioSource backgroundMusic;
+    private AudioSource victoryMusic;
     private bool fadingOut = false;
     private float fadeOutTimer = 0.0f;
     private bool fadingIn = true;
     private float fadeInTimer = 0.0f;
-    private const float FADE_TIME = 5.0f;
+    private const float OUT_FADE_TIME = 20.0f;
+    private const float IN_FADE_TIME = 2.0f;
     void Start()
     {
         fadeOut = GameObject.Find("Black").GetComponent<Image>();
+        backgroundMusic = GameObject.Find("BackgroundMusic").GetComponent<AudioSource>();
+        victoryMusic = GameObject.Find("VictoryFade").GetComponent<AudioSource>();
         if (currentLevel > 0) {
             time = PlayerPrefs.GetFloat(timePrefsKey, 0.0f);
         } else {
@@ -69,7 +75,7 @@ public class UiUpdate : MonoBehaviour
         if (fadingOut)
         {
             fadeOutTimer += Time.deltaTime;
-            if (fadeOutTimer >= FADE_TIME)
+            if (fadeOutTimer >= OUT_FADE_TIME)
             {
                 PlayerPrefs.SetFloat(timePrefsKey, time);
                 var nextSceneName = sceneNames[currentLevel + 1];
@@ -77,19 +83,22 @@ public class UiUpdate : MonoBehaviour
             }
             else
             {
-                fadeOut.color = new Color32(0,0,0,(byte)(255*(fadeOutTimer/FADE_TIME)));
+                fadeOut.color = new Color32(0,0,0,(byte)(255*(fadeOutTimer/OUT_FADE_TIME)));
+                // Fade background and bring in victory over the first 2 seconds
+                backgroundMusic.volume = Mathf.Max(0.0f, 1.0f - (fadeOutTimer * 0.5f));
+                victoryMusic.volume = Mathf.Min(1.0f, fadeOutTimer * 0.5f);
             }
         }
         else if (fadingIn)
         {
             fadeInTimer += Time.deltaTime;
-            if (fadeInTimer >= FADE_TIME)
+            if (fadeInTimer >= IN_FADE_TIME)
             {
                 fadingIn = false;
             }
             else
             {
-                fadeOut.color = new Color32(0,0,0,(byte)(255 - (255*(fadeInTimer/FADE_TIME))));
+                fadeOut.color = new Color32(0,0,0,(byte)(255 - (255*(fadeInTimer/IN_FADE_TIME))));
             }
         }
         else
