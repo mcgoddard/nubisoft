@@ -19,10 +19,7 @@ public class UiUpdate : MonoBehaviour
             _sacrifices = value;
             if (_sacrifices >= targetSacrificies) {
                 if (currentLevel < sceneNames.Length) {
-                    // TODO effect? Fade out or rumble or something
-                    PlayerPrefs.SetFloat(timePrefsKey, time);
-                    var nextSceneName = sceneNames[currentLevel + 1];
-                    SceneManager.LoadScene(nextSceneName, LoadSceneMode.Single);
+                    fadingOut = true;
                 }
                 else
                 {
@@ -45,8 +42,15 @@ public class UiUpdate : MonoBehaviour
     private Text fearText;
     private Text bunniesText;
     private Text timeText;
+    private Image fadeOut;
+    private bool fadingOut = false;
+    private float fadeOutTimer = 0.0f;
+    private bool fadingIn = true;
+    private float fadeInTimer = 0.0f;
+    private const float FADE_TIME = 5.0f;
     void Start()
     {
+        fadeOut = GameObject.Find("Black").GetComponent<Image>();
         if (currentLevel > 0) {
             time = PlayerPrefs.GetFloat(timePrefsKey, 0.0f);
         } else {
@@ -62,11 +66,40 @@ public class UiUpdate : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        time += Time.deltaTime;
-        sacrificesText.text = "Bunnies Sacrificed: " + sacrifices;
-        killsText.text = "Bunnies Killed: " + kills;
-        fearText.text = "Fear Level: " + fear;
-        bunniesText.text = "Bunnies: " + bunnies;
-        timeText.text = "Time: " + (int)time;
+        if (fadingOut)
+        {
+            fadeOutTimer += Time.deltaTime;
+            if (fadeOutTimer >= FADE_TIME)
+            {
+                PlayerPrefs.SetFloat(timePrefsKey, time);
+                var nextSceneName = sceneNames[currentLevel + 1];
+                SceneManager.LoadScene(nextSceneName, LoadSceneMode.Single);
+            }
+            else
+            {
+                fadeOut.color = new Color32(0,0,0,(byte)(255*(fadeOutTimer/FADE_TIME)));
+            }
+        }
+        else if (fadingIn)
+        {
+            fadeInTimer += Time.deltaTime;
+            if (fadeInTimer >= FADE_TIME)
+            {
+                fadingIn = false;
+            }
+            else
+            {
+                fadeOut.color = new Color32(0,0,0,(byte)(255 - (255*(fadeInTimer/FADE_TIME))));
+            }
+        }
+        else
+        {
+            time += Time.deltaTime;
+            sacrificesText.text = "Bunnies Sacrificed: " + sacrifices;
+            killsText.text = "Bunnies Killed: " + kills;
+            fearText.text = "Fear Level: " + fear;
+            bunniesText.text = "Bunnies: " + bunnies;
+            timeText.text = "Time: " + (int)time;
+        }
     }
 }
