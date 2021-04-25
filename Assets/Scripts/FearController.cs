@@ -15,10 +15,11 @@ public class FearController : MonoBehaviour
     private const float FEAR_SACRIFICE_MIN = 0.4f;
     private const float BUNNY_DROP_BUFFER = 0.2f;
     public float fear;
-
     private float fearTransferRate;
+    private UiUpdate uiUpdate;
 
     void Start() {
+        uiUpdate = GameObject.Find("UI").GetComponent<UiUpdate>();
         fear = Random.Range(0.0f, 0.1f);
         fearTransferRate = (1f - Random.Range(0.0f, 0.33f)) * BASE_FEAR_TRANSFER_RATE;
     }
@@ -78,6 +79,6 @@ public class FearController : MonoBehaviour
     }
 
     public void OnMouseDown() {
-        fear = FEAR_MAX;
+        fear = Mathf.Clamp(fear + uiUpdate.fearModifier, FEAR_MIN, FEAR_MAX);
     }
 }

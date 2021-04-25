@@ -1206,8 +1206,12 @@ PrefabInstance:
       value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 4152192112901879241, guid: d3894759cd4525f4f87dbac8cb7523f5, type: 3}
+      propertyPath: fearModifier
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4152192112901879241, guid: d3894759cd4525f4f87dbac8cb7523f5, type: 3}
       propertyPath: targetSacrificies
-      value: 25
+      value: 45
       objectReference: {fileID: 0}
     - target: {fileID: 4152192112901879252, guid: d3894759cd4525f4f87dbac8cb7523f5, type: 3}
       propertyPath: m_Name

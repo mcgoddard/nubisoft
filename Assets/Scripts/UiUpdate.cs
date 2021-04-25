@@ -4,6 +4,7 @@ using UnityEngine.SceneManagement;
 
 public class UiUpdate : MonoBehaviour
 {
+    public float fearModifier;
     private const string timePrefsKey = "TIME";
     // Start is called before the first frame update
     public int targetSacrificies;
@@ -15,16 +16,10 @@ public class UiUpdate : MonoBehaviour
         set
         {
             _sacrifices = value;
-            if (_sacrifices >= targetSacrificies) {
-                if (currentLevel < sceneNames.Length) {
-                    fadingOut = true;
-                    victoryMusic.Play();
-                }
-                else
-                {
-                    // TODO end game
-                    PlayerPrefs.SetFloat(timePrefsKey, 0.0f);
-                }
+            if (_sacrifices >= targetSacrificies && !fadingOut) {
+                _fadingOut = true;
+                sacrificesText.text = "Bunnies Sacrificed: " + targetSacrificies + "/" + targetSacrificies;
+                victoryMusic.Play();
             }
         }
         get
@@ -44,7 +39,14 @@ public class UiUpdate : MonoBehaviour
     private Image fadeOut;
     private AudioSource backgroundMusic;
     private AudioSource victoryMusic;
-    private bool fadingOut = false;
+    private bool _fadingOut = false;
+    public bool fadingOut
+    {
+        get
+        {
+            return _fadingOut;
+        }
+    }
     private float fadeOutTimer = 0.0f;
     private bool fadingIn = true;
     private float fadeInTimer = 0.0f;
@@ -110,7 +112,7 @@ public class UiUpdate : MonoBehaviour
         else
         {
             time += Time.deltaTime;
-            sacrificesText.text = "Bunnies Sacrificed: " + sacrifices;
+            sacrificesText.text = "Bunnies Sacrificed: " + sacrifices + "/" + targetSacrificies;
             killsText.text = "Bunnies Killed: " + kills;
             fearText.text = "Fear Level: " + fear;
             bunniesText.text = "Bunnies: " + bunnies;
