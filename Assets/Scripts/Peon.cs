@@ -118,6 +118,7 @@ public class Peon : MonoBehaviour
                     SetState(State.Sacrifice);
                     this.animator.SetTrigger("DroppedBunny");
                     this.animator.SetBool("Moving", false);
+                    this.animator.SetBool("Sacrifice", true);
                     this.stateChangeTimeout = 30f; // 30 seconds to perform sacrifice
                } else if(fearController.ShouldDropBunny()) {
                    // We either calmed down too much or walk past a bunch of terrified people to the point that we forget what we were doing
@@ -135,7 +136,7 @@ public class Peon : MonoBehaviour
                     uiUpdate.sacrifices += 1;
                     uiUpdate.bunnies -= 1;
                     WanderAimlessly();
-                    this.animator.SetTrigger("DroppedBunny");
+                    this.animator.SetBool("Sacrifice", false);
                 }
                 break;
             case State.Wandering:
