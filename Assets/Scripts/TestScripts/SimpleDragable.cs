@@ -8,16 +8,19 @@ public class SimpleDragable : MonoBehaviour
 {
     public GameObject target;
     private List<Vector3> path;
-    private bool dragging = false;
 
+    private Vector3 position;
 
-
-    void Update() {
+    void FixedUpdate() {
         if (target == null) return;
 
-        if (path == null && !dragging) {
-            path = Pathfinding.Instance.FindPath(this.transform.position, target.transform.position);
+        if (path == null || position != transform.position) {
+            path = Pathfinding.Instance.FindPath(this.transform.position, target.transform.position, 0.5f);
         }
+    }
+
+    void Update() {
+        if (path == null) return;
 
         var current = transform.position;
         for (int i = 0; i < path.Count; ++i) {
@@ -31,13 +34,5 @@ public class SimpleDragable : MonoBehaviour
         var position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         position.z = 0;
         transform.position = position;
-        dragging = true;
-    }
-
-    void OnMouseUp() {
-        if (dragging) {
-            dragging = false;
-            path = null;
-        }
     }
 }
