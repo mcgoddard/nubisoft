@@ -64,7 +64,8 @@ public class Peon : MonoBehaviour
             state = State.Grouping;
         } else {
             // If we're wandering pick a random direction
-            WanderAimlessly();
+            state = State.Wandering;
+            path = Pathfinding.Instance.RandomTarget(transform.position);
         }
     }
 
@@ -73,11 +74,6 @@ public class Peon : MonoBehaviour
     {
         Collider2D[] neighbours = GetNeighbours();
         Collider2D[] bunnies = GetBunnies();
-
-        if ((fearController.IsSufficientlyScaredToSacrifice() || fearController.IsTerrified()) && bunnies.Length > 0) {
-            bunnyTarget = bunnies[0]?.gameObject;
-            SetState(State.Chasing);
-        }
 
         switch (state) {
             case State.Grouping:
@@ -141,8 +137,13 @@ public class Peon : MonoBehaviour
                 break;
             case State.Wandering:
             default:
+                // TODO should we actually chase a rabbit?
+                if ((fearController.IsSufficientlyScaredToSacrifice() || fearController.IsTerrified()) && bunnies.Length > 0) {
+                    bunnyTarget = bunnies[0]?.gameObject;
+                    SetState(State.Chasing);
+                }
                 // We should stay away from the alter where people are sacrificing  bunnies. Not a pleasant place to hang out.
-                if (
+                else if (
                     neighbours.Any(neighbour => neighbour.GetComponent<Peon>()?.state == State.Sacrifice) &&
                     CurrentTarget() == null
                 )
@@ -157,7 +158,8 @@ public class Peon : MonoBehaviour
                     else
                         WanderAimlessly();
                 } else {
-                    // Do we need this code if we just delegate to WanderAimlessly whenever we need to move away from an area?
+                    // Not convinced we need this if we are walking to arbitrary places on the map
+                    // with pathfinding?
                     // Otherwise should we change direction?
                     //if (randomDirectionTimeout < 0.0f) {
                     //    // Perhaps turn slightly if we're walking alone
@@ -188,7 +190,7 @@ public class Peon : MonoBehaviour
                 break;
         }
 
-        ShowPath(Color.green);
+        ShowPath();
         UpdateAudioState();
         if (uiUpdate.fadingOut)
         {
@@ -200,17 +202,17 @@ public class Peon : MonoBehaviour
         Debug.LogFormat("State: {0}", state, path);
     }
 
-    void ShowPath(Color color, float duration = 0f) {
+    void ShowPath(float duration = 0f) {
         var current = transform.position;
         for (int i = 0; i < path.Count; ++i) {
             var next = path[i];
-            Debug.DrawLine(current, next, color, duration, false);
+            Debug.DrawLine(current, next, Color.green, duration, false);
             current = next;
         }
 
     }
     void OnMouseOver() {
-        ShowPath(Color.red, 1f);
+        ShowPath(5f);
     }
 
     // Apply rotation and velocity to the Peon based on their current state
@@ -224,6 +226,14 @@ public class Peon : MonoBehaviour
         transform.rotation = Quaternion.Slerp(transform.rotation, q, Time.deltaTime * ROTATION_SPEED);
         rigidbody.velocity = vectorToTarget.normalized * SPEED;
         stateChangeTimeout -= Time.deltaTime;
+    }
+
+    void OnCollisionEnter2D(Collision2D collision) {
+        // FIXME Be a bit more clever about this... Units now travel on the exact same paths so they often bumpt into
+        // other
+        if (this.state == State.Wandering && collision.collider.GetComponent<Peon>() != null) {
+            Physics2D.IgnoreCollision(collision.collider, collision.otherCollider);
+        }
     }
 
     void UpdateAudioState() {
@@ -345,7 +355,7 @@ public class Peon : MonoBehaviour
     }
 
     void WanderAimlessly() {
-        path = Pathfinding.Instance.RandomTarget(this.transform.position, 0.2f);
+        path = Pathfinding.Instance.RandomTarget(this.transform.position);
         SetMoving(true);
         SetState(State.Wandering);
     }
@@ -405,7 +415,7 @@ public class Peon : MonoBehaviour
 
     private void GoToAltar() {
         if (path.Count == 0 || path.Last() != altar.transform.position) {
-            path = Pathfinding.Instance.FindPath(transform.position, altar.transform.position, 0.2f);
+            path = Pathfinding.Instance.FindPath(transform.position, altar.transform.position);
         }
     }
 }

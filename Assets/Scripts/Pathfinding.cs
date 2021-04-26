@@ -86,18 +86,17 @@ public class Pathfinding : MonoBehaviour
         return nodes.FindAll(neighbour => Vector3.Distance(neighbour, point) <= nodeSeparation * 1.8  && neighbour != point);
     }
 
-    public List<Vector3> FindPath(Vector3 from, Vector3 to, float perturbBy = 0.0f)
+    public List<Vector3> FindPath(Vector3 from, Vector3 to)
     {
-        // FIXME, this does not work as intended, the raycast seems to mis the collider sometimes and I have no idea why
-        // There is nothing blocking our route the target, let's make a b-line for it.
-        //var hit = Physics2D.Raycast(from, to, Vector3.Distance(from, to), boundaryLayer);
-        //if (hit.collider == null)
-        //{
-        //    Debug.LogFormat("{0}", hit);
-        //    return new[] { to }.ToList();
-        //}
+        // TODO ignore anything but boundaries if we can...
+        var hit = Physics2D.Raycast(from, to, Vector3.Distance(from, to), boundaryLayer);
 
-        // Create a clone of the neighbours dictionary as we are going to modify it
+        // There is nothing blocking our route the target, let's make a b-line for it.
+        if (hit.collider == null)
+        {
+            return new[] { to }.ToList();
+        }
+
         var neighbours = new Dictionary<Vector3, List<Vector3>>(this.neighbours);
 
         // Find the nearest pathfinding nodes to the start position and add them
@@ -107,13 +106,12 @@ public class Pathfinding : MonoBehaviour
         // Find the nearest pathfinding nodes to the end position and it to their
         // list of neighbours
         FindNeigbours(to).ForEach(neighbour => {
-            // Copy the list of neighbours as this is still a reference to the list in the base map
             var copy = new List<Vector3>(neighbours[neighbour]);
             copy.Add(to);
             neighbours[neighbour] = copy;
         });
 
-        // Stores the best previous node to get to a node, we use this
+        // Stores the best previous node to get to a node node, we use this
         // to build the route back to the start.
         var cameFrom = new Dictionary<Vector3, Vector3>(nodes.Count);
 
@@ -146,18 +144,16 @@ public class Pathfinding : MonoBehaviour
             {
                 var path = new List<Vector3>();
                 path.Add(current);
-                var previousAngle = Mathf.Infinity;
                 while (cameFrom.TryGetValue(current, out current))
                 {
-                    var currentAngle = Vector3.Angle(Vector3.right, current - path[0]);
-                    if (currentAngle != previousAngle) {
+                        // FIXME: trying to smooth out the path, but this doesn't work for paths
+                        // That are just a single hard 90 degree turn
+                        // if (current.x == path[0].x || current.y == path[0].y)
+                        //     path[0] = current;
+                        // else
                         path.Insert(0, current);
-                    } else {
-                        path[0] = current;
-                    }
-                    previousAngle = currentAngle;
                 }
-                return Perturb(path, perturbBy);
+                return path;
             }
 
             foreach (var neighbour in neighbours[current])
@@ -198,26 +194,14 @@ public class Pathfinding : MonoBehaviour
         return new List<Vector3>();
     }
 
-    public List<Vector3> Perturb(List<Vector3> path, float amount) {
-        // Randomly shift the node and move it away from any collider
-        for (int i = 1; i < path.Count - 1; ++i) {
-            var newPosition = (Vector2)path[i] + Random.insideUnitCircle * amount;
-            var collider = Physics2D.OverlapCircle(newPosition, amount, boundaryLayer);
-            if (collider == null) {
-                path[i] = newPosition;
-            }
-        }
-        return path;
-    }
-
-    public List<Vector3> RandomTarget(Vector3 from, float perturbBy = 0.0f) {
+    public List<Vector3> RandomTarget(Vector3 from) {
         var to = new Vector3(Random.Range(bounds.min.x, bounds.max.x), Random.Range(bounds.min.y, bounds.max.y), 0);
         while(Physics2D.OverlapCircle(to, 0.2f) != null) {
             Debug.Log("Targeted a boundary collider, trying gain");
             to = new Vector3(Random.Range(bounds.min.x, bounds.max.x), Random.Range(bounds.min.y, bounds.max.y), 0);
         }
 
-        return FindPath(from, to, perturbBy);
+        return FindPath(from, to);
     }
 
 
