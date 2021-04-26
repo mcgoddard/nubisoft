@@ -196,7 +196,7 @@ public class Pathfinding : MonoBehaviour
 
     public List<Vector3> RandomTarget(Vector3 from) {
         var to = new Vector3(Random.Range(bounds.min.x, bounds.max.x), Random.Range(bounds.min.y, bounds.max.y), 0);
-        while(Physics2D.OverlapCircle(to, 0.2f) != null) {
+        while(Physics2D.OverlapCircle(to, 0.2f, boundaryLayer) != null) {
             Debug.Log("Targeted a boundary collider, trying gain");
             to = new Vector3(Random.Range(bounds.min.x, bounds.max.x), Random.Range(bounds.min.y, bounds.max.y), 0);
         }
