@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -16,7 +15,7 @@ public class Peon : MonoBehaviour
     public LayerMask peonsLayer;
     public LayerMask bunniesLayer;
     public State state = State.Grouping;
-    public List<Vector3> path;
+    public Vector2 target;
     public bool move = false;
     private GameObject bunnyTarget;
     private GameObject altar;
@@ -27,7 +26,7 @@ public class Peon : MonoBehaviour
     private float randomDirectionTimeout = RANDOM_DIRECTION_TIMEOUT;
     private new Rigidbody2D rigidbody;
     private const float SPEED = 1f;
-    private const float ROTATION_SPEED = 10f;
+    private const float ROTATION_SPEED = 1f;
     private const float STATE_CHANGE_TIMEOUT = 15.0f;
     private const float MAP_SIZE = 18.0f;
     private const float RANDOM_DIRECTION_TIMEOUT = 10.0f;
@@ -65,7 +64,7 @@ public class Peon : MonoBehaviour
         } else {
             // If we're wandering pick a random direction
             state = State.Wandering;
-            path = Pathfinding.Instance.RandomTarget(transform.position);
+            target = (Vector2)transform.position + new Vector2((Random.value * 10f) - 5f, (Random.value * 10f) - 5f);
         }
     }
 
@@ -81,7 +80,8 @@ public class Peon : MonoBehaviour
                 // or all neighbours have already left which to randomly wandering
                 if (((stateChangeTimeout < 0.0f || neighbours.Length < 3 || neighbours.Length > 4) && 
                     Random.value < (0.1 * Time.deltaTime)) || neighbours.Length == 1) {
-                    WanderAimlessly();
+                    SetRandomTarget();
+                    SetState(State.Wandering);
                 } else {
                     // Otherwise stay centred on the group
                     SetGroupTarget(neighbours);
@@ -90,7 +90,8 @@ public class Peon : MonoBehaviour
             case State.Chasing:
                 // Check our target hasn't been picked up by another peon
                 if (bunnyTarget == null) {
-                    WanderAimlessly();
+                    SetRandomTarget();
+                    SetState(State.Wandering);
                 } else if ((bunnyTarget.transform.position - transform.position).magnitude < CATCH_DISTANCE) {
                     // If we've caught it update our state and destroy the bunny object
                     GameObject.Destroy(bunnyTarget);
@@ -105,11 +106,12 @@ public class Peon : MonoBehaviour
                     }
                 } else {
                     // Otherwise keep up the chase
-                    path = new[] { bunnyTarget.transform.position }.ToList();
+                    target = bunnyTarget.transform.position;
                 }
                 break;
             case State.CarryingBunny:
                 // If we've reached the alter start sacrificing
+                
                 if (altar.GetComponent<Renderer>().bounds.Contains(transform.position)) {
                     SetState(State.Sacrifice);
                     this.animator.SetTrigger("DroppedBunny");
@@ -119,11 +121,11 @@ public class Peon : MonoBehaviour
                } else if(fearController.ShouldDropBunny()) {
                    // We either calmed down too much or walk past a bunch of terrified people to the point that we forget what we were doing
                    this.animator.SetTrigger("DroppedBunny");
+                   this.SetState(State.Wandering);
                    this.transform.parent.GetComponent<Spawner>()?.SpawnBunny(this.transform.position);
-                   WanderAimlessly();
                 } else {
                     // Otherwise keep aiming for the altar
-                    GoToAltar();
+                    target = altar.transform.position;
                 }
                 break;
             case State.Sacrifice:
@@ -131,7 +133,10 @@ public class Peon : MonoBehaviour
                 if (stateChangeTimeout < 0) {
                     uiUpdate.sacrifices += 1;
                     uiUpdate.bunnies -= 1;
-                    WanderAimlessly();
+                    target = (Vector2)transform.position + ((Vector2)transform.position - (Vector2)altar.transform.position);
+                    SetMoving(true);
+                    SetState(State.Wandering);
+                    this.animator.SetTrigger("DroppedBunny");
                     this.animator.SetBool("Sacrifice", false);
                 }
                 break;
@@ -143,96 +148,60 @@ public class Peon : MonoBehaviour
                     SetState(State.Chasing);
                 }
                 // We should stay away from the alter where people are sacrificing  bunnies. Not a pleasant place to hang out.
-                else if (
-                    neighbours.Any(neighbour => neighbour.GetComponent<Peon>()?.state == State.Sacrifice) &&
-                    CurrentTarget() == null
-                )
-                {
-                    WanderAimlessly();
+                else if (neighbours.Any(neighbour => neighbour.GetComponent<Peon>()?.state == State.Sacrifice)) {
+                    SetAntiGroupTarget(neighbours);
+                    SetState(State.Wandering);
                 }
                 // If we've got some neighbours and are ready to finish wandering form a group with those neighbours
                 // This will result in following that neighbour if they aren't ready to group yet
-                else if (stateChangeTimeout < 0) {
-                    if (neighbours.Length > 3)
-                        SetState(State.Grouping);
-                    else
-                        WanderAimlessly();
+                else if (stateChangeTimeout < 0 && neighbours.Length > 3) {
+                    SetState(State.Grouping);
                 } else {
-                    // Not convinced we need this if we are walking to arbitrary places on the map
-                    // with pathfinding?
                     // Otherwise should we change direction?
-                    //if (randomDirectionTimeout < 0.0f) {
-                    //    // Perhaps turn slightly if we're walking alone
-                    //    if (neighbours.Length == 1) {
-                    //        target = target + new Vector2(Random.value * 0.1f, Random.value * 0.1f);
-                    //        SetMoving(true);
-                    //    } else {
-                    //        // Or if there are people nearby walk away from their centrepoint
-                    //        SetAntiGroupTarget(neighbours);
-                    //    }
-                    //    // Reset the direction change timeout (this prevents us constantly changing direction)
-                    //    randomDirectionTimeout = plusMinusPercent(RANDOM_DIRECTION_TIMEOUT, 20);
-                    //} else {
-                    //    // We're not going to change direction, so just ensure we haven't reached our target
-                    //    randomDirectionTimeout -= Time.deltaTime;
-                    //    target = (Vector2)transform.position + ((target - (Vector2)transform.position).normalized);
-                    //    SetMoving(true);
-                    //    // Turn if our target is outside the play area
-                    //    var upperMapBoundry = MAP_SIZE / 2.0f;
-                    //    var lowerMapBoundry = upperMapBoundry * -1.0f;
-                    //    if (target.x > upperMapBoundry || target.x < lowerMapBoundry || target.y > upperMapBoundry || target.y < lowerMapBoundry) {
-                    //        Vector3 targetDirection = target - (Vector2)transform.position;
-                    //        Quaternion rotationToNewTarget = Quaternion.AngleAxis(90, Vector3.forward);
-                    //        target = rotationToNewTarget * targetDirection;
-                    //    }
-                    //}
+                    if (randomDirectionTimeout < 0.0f) {
+                        // Perhaps turn slightly if we're walking alone
+                        if (neighbours.Length == 1) {
+                            target = target + new Vector2(Random.value * 0.1f, Random.value * 0.1f);
+                            SetMoving(true);
+                        } else {
+                            // Or if there are people nearby walk away from their centrepoint
+                            SetAntiGroupTarget(neighbours);
+                        }
+                        // Reset the direction change timeout (this prevents us constantly changing direction)
+                        randomDirectionTimeout = plusMinusPercent(RANDOM_DIRECTION_TIMEOUT, 20);
+                    } else {
+                        // We're not going to change direction, so just ensure we haven't reached our target
+                        randomDirectionTimeout -= Time.deltaTime;
+                        target = (Vector2)transform.position + ((target - (Vector2)transform.position).normalized);
+                        SetMoving(true);
+                        // Turn if our target is outside the play area
+                        var upperMapBoundry = MAP_SIZE / 2.0f;
+                        var lowerMapBoundry = upperMapBoundry * -1.0f;
+                        if (target.x > upperMapBoundry || target.x < lowerMapBoundry || target.y > upperMapBoundry || target.y < lowerMapBoundry) {
+                            Vector3 targetDirection = target - (Vector2)transform.position;
+                            Quaternion rotationToNewTarget = Quaternion.AngleAxis(90, Vector3.forward);
+                            target = rotationToNewTarget * targetDirection;
+                        }
+                    }
                 }
                 break;
         }
+        // Apply rotation and velocity to the Peon based on their current state
+        Vector3 vectorToTarget = target - (Vector2)transform.position;
+        float angle = Mathf.Atan2(vectorToTarget.y, vectorToTarget.x) * Mathf.Rad2Deg;
+        Quaternion q = Quaternion.AngleAxis(angle, Vector3.forward);
+        transform.rotation = Quaternion.Slerp(transform.rotation, q, Time.deltaTime * ROTATION_SPEED);
+        if (move) {
+            rigidbody.velocity = vectorToTarget.normalized * SPEED;
+        } else {
+            rigidbody.velocity = new Vector2(0, 0);
+        }
+        stateChangeTimeout -= Time.deltaTime;
 
-        ShowPath();
         UpdateAudioState();
         if (uiUpdate.fadingOut)
         {
             audioSource.mute = true;
-        }
-    }
-
-    void OnMouseEnter() {
-        Debug.LogFormat("State: {0}", state, path);
-    }
-
-    void ShowPath(float duration = 0f) {
-        var current = transform.position;
-        for (int i = 0; i < path.Count; ++i) {
-            var next = path[i];
-            Debug.DrawLine(current, next, Color.green, duration, false);
-            current = next;
-        }
-
-    }
-    void OnMouseOver() {
-        ShowPath(5f);
-    }
-
-    // Apply rotation and velocity to the Peon based on their current state
-    // This is done in Fixed Update so that we don't accidentally over-shoot our
-    // waypoint if the framerate drops
-    void FixedUpdate() {
-        Vector3 currentTarget = CurrentTarget();
-        Vector3 vectorToTarget = currentTarget - transform.position;
-        float angle = Mathf.Atan2(vectorToTarget.y, vectorToTarget.x) * Mathf.Rad2Deg;
-        Quaternion q = Quaternion.AngleAxis(angle, Vector3.forward);
-        transform.rotation = Quaternion.Slerp(transform.rotation, q, Time.deltaTime * ROTATION_SPEED);
-        rigidbody.velocity = vectorToTarget.normalized * SPEED;
-        stateChangeTimeout -= Time.deltaTime;
-    }
-
-    void OnCollisionEnter2D(Collision2D collision) {
-        // FIXME Be a bit more clever about this... Units now travel on the exact same paths so they often bumpt into
-        // other
-        if (this.state == State.Wandering && collision.collider.GetComponent<Peon>() != null) {
-            Physics2D.IgnoreCollision(collision.collider, collision.otherCollider);
         }
     }
 
@@ -339,25 +308,25 @@ public class Peon : MonoBehaviour
 
     // Move towards the centrepoint of your neighbours, but don't get too close to the centre
     void SetGroupTarget(Collider2D[] neighbours) {
-        Vector3 total = neighbours.Aggregate(new Vector3(), (a, n) => n.gameObject.transform.position + a);
-        Vector3 centrePoint = total/neighbours.Length;
-        SetMoving(!((centrePoint - transform.position).magnitude < GROUP_STANDOFF_DISTANCE));
-        path = new[] { centrePoint }.ToList();
+        Vector2 total = neighbours.Aggregate(new Vector3(), (a, n) => n.gameObject.transform.position + a);
+        Vector2 centrePoint = total/neighbours.Length;
+        SetMoving(!((centrePoint - (Vector2)transform.position).magnitude < GROUP_STANDOFF_DISTANCE));
+        target = centrePoint;
     }
 
     // Move away from the centrepoint of your neighbours
     void SetAntiGroupTarget(Collider2D[] neighbours) {
-        Vector3 total = neighbours.Aggregate(new Vector3(), (a, n) => n.gameObject.transform.position + a);
-        Vector3 centrePoint = total/neighbours.Length;
-        var direction = (centrePoint - transform.position) * -10.0f;
+        Vector2 total = neighbours.Aggregate(new Vector3(), (a, n) => n.gameObject.transform.position + a);
+        Vector2 centrePoint = total/neighbours.Length;
+        var direction = (centrePoint - (Vector2)transform.position) * -10.0f;
         SetMoving(true);
-        path = new[] { direction }.ToList();
+        target = direction;
     }
 
-    void WanderAimlessly() {
-        path = Pathfinding.Instance.RandomTarget(this.transform.position);
+    // Set a random target location
+    void SetRandomTarget() {
+        target = (Vector2)transform.position + new Vector2(Random.Range(-5f, 5f), Random.Range(-5f, 5f));
         SetMoving(true);
-        SetState(State.Wandering);
     }
 
     // Get the colliders for nearby Peons (your neighbours)
@@ -390,32 +359,5 @@ public class Peon : MonoBehaviour
 
     T PickOne<T>(T[] array) {
         return array[Random.Range(0, array.Length)];
-    }
-
-    private Vector3 CurrentTarget() {
-        // No where to go, stand still.
-        if (path.Count == 0) {
-            return transform.position;
-        }
-
-        var current = path.First();
-
-        // If we're close enough to the next point in our path, just start
-        // heading to the next point. If it's our last waypoint we return
-        // our current position so that our caller can perfrom strict equality
-        // to know we've arrived.
-        if (Vector3.Distance(current, transform.position) < 0.1f) {
-            path.RemoveAt(0);
-            return path.Count > 0 ? path.First() : transform.position;
-        }
-
-        // Otherwise, carry on!
-        return current;
-    }
-
-    private void GoToAltar() {
-        if (path.Count == 0 || path.Last() != altar.transform.position) {
-            path = Pathfinding.Instance.FindPath(transform.position, altar.transform.position);
-        }
     }
 }
