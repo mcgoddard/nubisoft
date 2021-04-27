@@ -24,14 +24,14 @@ public class Peon : MonoBehaviour
     private UiUpdate uiUpdate;
     private Animator animator;
     private float stateChangeTimeout = STATE_CHANGE_TIMEOUT;
-    // private float randomDirectionTimeout = RANDOM_DIRECTION_TIMEOUT;
+    private float randomDirectionTimeout = RANDOM_DIRECTION_TIMEOUT;
     private new Rigidbody2D rigidbody;
     private const float SPEED = 1f;
     private const float ROTATION_SPEED = 10f;
     private const float STATE_CHANGE_TIMEOUT = 15.0f;
     private const float MAP_SIZE = 18.0f;
     private const float RANDOM_DIRECTION_TIMEOUT = 10.0f;
-    private const float GROUP_STANDOFF_DISTANCE = 1.0f;
+    private const float GROUP_STANDOFF_DISTANCE = 0.5f;
     private const float CATCH_DISTANCE = 0.3f;
     private const float SACRIFICE_DISTANCE = 0.5f;
     private const float NEIGHBOUR_SEARCH_RADIUS = 2f;
@@ -50,7 +50,7 @@ public class Peon : MonoBehaviour
 
 
     // Start is called before the first frame update
-    void Awake()
+    void Start()
     {
         uiUpdate = GameObject.Find("UI")?.GetComponent<UiUpdate>();
         fearController = GetComponent<FearController>();
@@ -74,9 +74,16 @@ public class Peon : MonoBehaviour
         Collider2D[] neighbours = GetNeighbours();
         Collider2D[] bunnies = GetBunnies();
 
-        if ((fearController.IsSufficientlyScaredToSacrifice() || fearController.IsTerrified()) && bunnies.Length > 0) {
-            bunnyTarget = bunnies[0]?.gameObject;
+        if (
+            (fearController.IsSufficientlyScaredToSacrifice() || fearController.IsTerrified()) &&
+            state != State.Sacrifice &&
+            state != State.CarryingBunny &&
+            bunnies.Length > 0
+        ) {
+            if (bunnyTarget == null)
+                bunnyTarget = bunnies[0]?.gameObject;
             SetState(State.Chasing);
+            SetMoving(true);
         }
 
         switch (state) {
@@ -87,8 +94,13 @@ public class Peon : MonoBehaviour
                     Random.value < (0.1 * Time.deltaTime)) || neighbours.Length == 1) {
                     WanderAimlessly();
                 } else {
-                    // Otherwise stay centred on the group
-                    SetGroupTarget(neighbours);
+                    // We should stay away from the alter where people are sacrificing  bunnies. Not a pleasant place to hang out.
+                    if (neighbours.Any(neighbour => neighbour.GetComponent<Peon>()?.state == State.Sacrifice)) {
+                        WanderAimlessly();
+                    } else {
+                        // Otherwise stay centred on the group
+                        SetGroupTarget(neighbours);
+                    }
                 }
                 break;
             case State.Chasing:
@@ -116,6 +128,7 @@ public class Peon : MonoBehaviour
                 // If we've reached the alter start sacrificing
                 if (altar.GetComponent<Renderer>().bounds.Contains(transform.position)) {
                     SetState(State.Sacrifice);
+                    SetMoving(false);
                     this.animator.SetTrigger("DroppedBunny");
                     this.animator.SetBool("Moving", false);
                     this.animator.SetBool("Sacrifice", true);
@@ -144,56 +157,30 @@ public class Peon : MonoBehaviour
                 // We should stay away from the alter where people are sacrificing  bunnies. Not a pleasant place to hang out.
                 if (
                     neighbours.Any(neighbour => neighbour.GetComponent<Peon>()?.state == State.Sacrifice) &&
-                    CurrentTarget() == null
-                )
-                {
+                    CurrentTarget() == transform.position
+                ) {
                     WanderAimlessly();
                 }
-                // If we've got some neighbours and are ready to finish wandering form a group with those neighbours
-                // This will result in following that neighbour if they aren't ready to group yet
-                else if (stateChangeTimeout < 0) {
+                else if (stateChangeTimeout < 0 || CurrentDestination() == transform.position) {
                     if (neighbours.Length > 3)
                         SetState(State.Grouping);
                     else
                         WanderAimlessly();
-                } else {
-                    // Do we need this code if we just delegate to WanderAimlessly whenever we need to move away from an area?
-                    // Otherwise should we change direction?
-                    //if (randomDirectionTimeout < 0.0f) {
-                    //    // Perhaps turn slightly if we're walking alone
-                    //    if (neighbours.Length == 1) {
-                    //        target = target + new Vector2(Random.value * 0.1f, Random.value * 0.1f);
-                    //        SetMoving(true);
-                    //    } else {
-                    //        // Or if there are people nearby walk away from their centrepoint
-                    //        SetAntiGroupTarget(neighbours);
-                    //    }
-                    //    // Reset the direction change timeout (this prevents us constantly changing direction)
-                    //    randomDirectionTimeout = plusMinusPercent(RANDOM_DIRECTION_TIMEOUT, 20);
-                    //} else {
-                    //    // We're not going to change direction, so just ensure we haven't reached our target
-                    //    randomDirectionTimeout -= Time.deltaTime;
-                    //    target = (Vector2)transform.position + ((target - (Vector2)transform.position).normalized);
-                    //    SetMoving(true);
-                    //    // Turn if our target is outside the play area
-                    //    var upperMapBoundry = MAP_SIZE / 2.0f;
-                    //    var lowerMapBoundry = upperMapBoundry * -1.0f;
-                    //    if (target.x > upperMapBoundry || target.x < lowerMapBoundry || target.y > upperMapBoundry || target.y < lowerMapBoundry) {
-                    //        Vector3 targetDirection = target - (Vector2)transform.position;
-                    //        Quaternion rotationToNewTarget = Quaternion.AngleAxis(90, Vector3.forward);
-                    //        target = rotationToNewTarget * targetDirection;
-                    //    }
-                    //}
                 }
                 break;
         }
 
         ShowPath(Color.green);
         UpdateAudioState();
+
         if (uiUpdate.fadingOut)
         {
             audioSource.mute = true;
         }
+    }
+
+    void OnMouseEnter() {
+        Debug.LogFormat("State: {0}", state, path);
     }
 
     void ShowPath(Color color, float duration = 0f) {
@@ -203,8 +190,8 @@ public class Peon : MonoBehaviour
             Debug.DrawLine(current, next, color, duration, false);
             current = next;
         }
-
     }
+
     void OnMouseOver() {
         ShowPath(Color.red, 1f);
     }
@@ -213,13 +200,33 @@ public class Peon : MonoBehaviour
     // This is done in Fixed Update so that we don't accidentally over-shoot our
     // waypoint if the framerate drops
     void FixedUpdate() {
-        Vector3 currentTarget = CurrentTarget();
-        Vector3 vectorToTarget = currentTarget - transform.position;
-        float angle = Mathf.Atan2(vectorToTarget.y, vectorToTarget.x) * Mathf.Rad2Deg;
-        Quaternion q = Quaternion.AngleAxis(angle, Vector3.forward);
-        transform.rotation = Quaternion.Slerp(transform.rotation, q, Time.deltaTime * ROTATION_SPEED);
-        rigidbody.velocity = vectorToTarget.normalized * SPEED;
-        stateChangeTimeout -= Time.deltaTime;
+        if (move) {
+            Vector3 currentTarget = CurrentTarget();
+            Vector3 vectorToTarget = currentTarget - transform.position;
+            float angle = Mathf.Atan2(vectorToTarget.y, vectorToTarget.x) * Mathf.Rad2Deg;
+            Quaternion q = Quaternion.AngleAxis(angle, Vector3.forward);
+            transform.rotation = Quaternion.Slerp(transform.rotation, q, Time.deltaTime * ROTATION_SPEED);
+            rigidbody.velocity = transform.right * SPEED;
+            stateChangeTimeout -= Time.deltaTime;
+        } else {
+            rigidbody.velocity = Vector3.zero;
+        }
+    }
+
+    IEnumerator TemporarilyDisableCollision(Collider2D collider1, Collider2D collider2) {
+        Physics2D.IgnoreCollision(collider1, collider2);
+        yield return new WaitForSeconds(1f);
+        Physics2D.IgnoreCollision(collider1, collider2, false);
+
+    }
+    void OnCollisionEnter2D(Collision2D collision) {
+        if (state == State.Wandering)
+        {
+            var isPeon = collision.collider.GetComponent<Peon>() != null;
+            if (isPeon) {
+                StartCoroutine(TemporarilyDisableCollision(collision.otherCollider, collision.collider));
+            }
+        }
     }
 
     void UpdateAudioState() {
@@ -325,19 +332,23 @@ public class Peon : MonoBehaviour
 
     // Move towards the centrepoint of your neighbours, but don't get too close to the centre
     void SetGroupTarget(Collider2D[] neighbours) {
-        Vector3 total = neighbours.Aggregate(new Vector3(), (a, n) => n.gameObject.transform.position + a);
-        Vector3 centrePoint = total/neighbours.Length;
-        SetMoving(!((centrePoint - transform.position).magnitude < GROUP_STANDOFF_DISTANCE));
-        path = new[] { centrePoint }.ToList();
-    }
+        var groupingNeighbours = neighbours.Where(collider => collider.GetComponent<Peon>()?.state == State.Grouping);
+        var total = groupingNeighbours.Aggregate(new Vector3(), (a, n) => n.gameObject.transform.position + a);
 
-    // Move away from the centrepoint of your neighbours
-    void SetAntiGroupTarget(Collider2D[] neighbours) {
-        Vector3 total = neighbours.Aggregate(new Vector3(), (a, n) => n.gameObject.transform.position + a);
-        Vector3 centrePoint = total/neighbours.Length;
-        var direction = (centrePoint - transform.position) * -10.0f;
-        SetMoving(true);
-        path = new[] { direction }.ToList();
+        Vector3 centrePoint = total/groupingNeighbours.Count();
+        var shouldMove = !((centrePoint - transform.position).magnitude < GROUP_STANDOFF_DISTANCE);
+
+        SetMoving(shouldMove);
+
+        if (shouldMove) {
+            // If we're not already headed towards the centre, path-find to it
+            if (Vector3.Distance(centrePoint, CurrentDestination()) >= GROUP_STANDOFF_DISTANCE) {
+                path = Pathfinding.Instance.FindPath(transform.position, centrePoint);
+            }
+        } else {
+            // If we're in the group just look towards the centre
+            this.transform.right = (centrePoint - this.transform.position).normalized;
+        }
     }
 
     void WanderAimlessly() {
@@ -397,6 +408,15 @@ public class Peon : MonoBehaviour
 
         // Otherwise, carry on!
         return current;
+    }
+
+    private Vector3 CurrentDestination() {
+        // No where to go, stand still.
+        if (path.Count == 0) {
+            return transform.position;
+        }
+
+        return path.Last();
     }
 
     private void GoToAltar() {

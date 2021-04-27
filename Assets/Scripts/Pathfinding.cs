@@ -89,7 +89,6 @@ public class Pathfinding : MonoBehaviour
     {
         if (!Physics2D.Raycast(from, to - from, Vector3.Distance(from, to), boundaryLayer))
         {
-            Debug.Log("Have direct line of sight to target, heading straight there!");
             return new[] { to }.ToList();
         }
 

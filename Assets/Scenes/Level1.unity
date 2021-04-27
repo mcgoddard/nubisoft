@@ -615,8 +615,8 @@ CapsuleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -0.23, y: -0.82}
-  m_Size: {x: 2.49, y: 1.24}
+  m_Offset: {x: -0.34880775, y: -0.78167486}
+  m_Size: {x: 2.4903846, y: 1.6195589}
   m_Direction: 1
 --- !u!70 &499811807
 CapsuleCollider2D:
@@ -663,8 +663,8 @@ CapsuleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 1.34, y: 1.45}
-  m_Size: {x: 2.52, y: 3.36}
+  m_Offset: {x: 1.3399999, y: 1.45}
+  m_Size: {x: 2.52, y: 3.3600001}
   m_Direction: 0
 --- !u!70 &499811810
 CapsuleCollider2D:
