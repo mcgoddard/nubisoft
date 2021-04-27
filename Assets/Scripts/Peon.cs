@@ -132,7 +132,7 @@ public class Peon : MonoBehaviour
                     this.animator.SetTrigger("DroppedBunny");
                     this.animator.SetBool("Moving", false);
                     this.animator.SetBool("Sacrifice", true);
-                    this.stateChangeTimeout = 30f; // 30 seconds to perform sacrifice
+                    this.stateChangeTimeout = 10f; // 10 seconds to perform sacrifice
                } else if(fearController.ShouldDropBunny()) {
                    // We either calmed down too much or walk past a bunch of terrified people to the point that we forget what we were doing
                    this.animator.SetTrigger("DroppedBunny");
@@ -169,6 +169,7 @@ public class Peon : MonoBehaviour
                 }
                 break;
         }
+        stateChangeTimeout -= Time.deltaTime;
 
         ShowPath(Color.green);
         UpdateAudioState();
@@ -207,7 +208,6 @@ public class Peon : MonoBehaviour
             Quaternion q = Quaternion.AngleAxis(angle, Vector3.forward);
             transform.rotation = Quaternion.Slerp(transform.rotation, q, Time.deltaTime * ROTATION_SPEED);
             rigidbody.velocity = transform.right * SPEED;
-            stateChangeTimeout -= Time.deltaTime;
         } else {
             rigidbody.velocity = Vector3.zero;
         }

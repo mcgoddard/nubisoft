@@ -5,8 +5,7 @@ using UnityEngine.SceneManagement;
 public class UiUpdate : MonoBehaviour
 {
     public float fearModifier;
-    private const string timePrefsKey = "TIME";
-    // Start is called before the first frame update
+    private const string TIME_PREFS_KEY = "TIME";
     public int targetSacrificies;
     public int currentLevel;
     private static string[] sceneNames = { "Level1", "Level2", "Level3", "Level4", "Level5" };
@@ -31,9 +30,9 @@ public class UiUpdate : MonoBehaviour
     public int bunnies = 0;
     public float fear = 5.0f;
     public float time = 0.0f;
-    private Text sacrificesText;
-    private Text timeText;
-    private Image fadeOut;
+    public Text sacrificesText;
+    public Text timeText;
+    public Image fadeOut;
     private AudioSource backgroundMusic;
     private AudioSource victoryMusic;
     private bool _fadingOut = false;
@@ -51,16 +50,13 @@ public class UiUpdate : MonoBehaviour
     private const float IN_FADE_TIME = 2.0f;
     void Start()
     {
-        fadeOut = GameObject.Find("Black").GetComponent<Image>();
         backgroundMusic = GameObject.Find("BackgroundMusic").GetComponent<AudioSource>();
         victoryMusic = GameObject.Find("VictoryFade").GetComponent<AudioSource>();
         if (currentLevel > 0) {
-            time = PlayerPrefs.GetFloat(timePrefsKey, 0.0f);
+            time = PlayerPrefs.GetFloat(TIME_PREFS_KEY, 0.0f);
         } else {
             time = 0.0f;
         }
-        sacrificesText = GameObject.Find("Sacrifices").GetComponent<Text>();
-        timeText = GameObject.Find("Time").GetComponent<Text>();
     }
 
     // Update is called once per frame
@@ -71,7 +67,7 @@ public class UiUpdate : MonoBehaviour
             fadeOutTimer += Time.deltaTime;
             if (fadeOutTimer >= OUT_FADE_TIME)
             {
-                PlayerPrefs.SetFloat(timePrefsKey, time);
+                PlayerPrefs.SetFloat(TIME_PREFS_KEY, time);
                 if (currentLevel + 1 < sceneNames.Length)
                 {
                     var nextSceneName = sceneNames[currentLevel + 1];
@@ -85,10 +81,10 @@ public class UiUpdate : MonoBehaviour
             }
             else
             {
-                fadeOut.color = new Color32(0,0,0,(byte)(255*(fadeOutTimer/OUT_FADE_TIME)));
+                fadeOut.color = new Color32(0,0,0,(byte)(Mathf.Min(255, 255 * (fadeOutTimer / 10f))));
                 // Fade background and bring in victory over the first 2 seconds
-                backgroundMusic.volume = Mathf.Max(0.0f, 1.0f - (fadeOutTimer * 0.5f));
-                victoryMusic.volume = Mathf.Min(1.0f, fadeOutTimer * 0.5f);
+                backgroundMusic.volume = Mathf.Max(0.0f, 1.0f - (fadeOutTimer / 2f));
+                victoryMusic.volume = Mathf.Min(1.0f, fadeOutTimer / 2f);
             }
         }
         else if (fadingIn)

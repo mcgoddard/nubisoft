@@ -9,7 +9,7 @@ public class MainMenu : MonoBehaviour
     private Image fadeOut;
     private bool fading = false;
     private float fadeOutTimer = 0.0f;
-    private const float FADE_OUT_TIME = 5.0f;
+    private const float FADE_OUT_TIME = 3.0f;
 
     void Start()
     {
