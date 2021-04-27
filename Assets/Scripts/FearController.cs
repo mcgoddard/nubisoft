@@ -14,6 +14,8 @@ public class FearController : MonoBehaviour
     private const float FEAR_SACRIFICE_MAX = 0.6f;
     private const float FEAR_SACRIFICE_MIN = 0.4f;
     private const float BUNNY_DROP_BUFFER = 0.2f;
+    private const float TERRIFIED_LEVEL = 0.9f;
+    private Peon peon;
     public float fear;
     private float fearTransferRate;
     private UiUpdate uiUpdate;
@@ -22,6 +24,7 @@ public class FearController : MonoBehaviour
         uiUpdate = GameObject.Find("UI").GetComponent<UiUpdate>();
         fear = Random.Range(0.0f, 0.1f);
         fearTransferRate = (1f - Random.Range(0.0f, 0.33f)) * BASE_FEAR_TRANSFER_RATE;
+        peon = this.GetComponent<Peon>();
     }
 
     void Update() {
@@ -78,7 +81,17 @@ public class FearController : MonoBehaviour
         return fear;
     }
 
-    public void OnMouseDown() {
-        fear = Mathf.Clamp(fear + uiUpdate.fearModifier, FEAR_MIN, FEAR_MAX);
+    public void OnMouseDown()
+    {
+        var newFear = Mathf.Clamp(fear + uiUpdate.fearModifier, FEAR_MIN, FEAR_MAX);
+
+        if (fear < TERRIFIED_LEVEL && newFear > TERRIFIED_LEVEL) {
+            this.GetComponent<AudioSource>().PlayOneShot(peon.screamSamples[2]);
+        } else if (fear < FEAR_SACRIFICE_MAX && newFear > FEAR_SACRIFICE_MAX) {
+            this.GetComponent<AudioSource>().PlayOneShot(peon.screamSamples[1]);
+        } else if (fear < FEAR_SACRIFICE_MIN && newFear > FEAR_SACRIFICE_MIN) {
+            this.GetComponent<AudioSource>().PlayOneShot(peon.screamSamples[0]);
+        }
+        fear = newFear;
     }
 }

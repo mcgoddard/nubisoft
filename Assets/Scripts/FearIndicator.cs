@@ -32,6 +32,9 @@ public class FearIndicator : MonoBehaviour
 
     void Update()
     {
-        GetComponent<Renderer>().material.color = gradient.Evaluate(this.GetComponentInParent<FearController>().GetFearLevel());
+        var renderer = GetComponent<Renderer>();
+        if (renderer != null) {
+            renderer.material.color = gradient.Evaluate(this.GetComponentInParent<FearController>().GetFearLevel());
+        }
     }
 }

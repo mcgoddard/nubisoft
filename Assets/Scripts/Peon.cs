@@ -46,6 +46,7 @@ public class Peon : MonoBehaviour
     public AudioClip[] tetchySamples;
     public AudioClip[] hmmSamples;
     public AudioClip[] whistlingSamples;
+    public AudioClip[] screamSamples;
     public GameObject bloodSplatDecal;
 
 
@@ -180,10 +181,6 @@ public class Peon : MonoBehaviour
         }
     }
 
-    void OnMouseEnter() {
-        Debug.LogFormat("State: {0}", state, path);
-    }
-
     void ShowPath(Color color, float duration = 0f) {
         var current = transform.position;
         for (int i = 0; i < path.Count; ++i) {
@@ -193,8 +190,16 @@ public class Peon : MonoBehaviour
         }
     }
 
-    void OnMouseOver() {
-        ShowPath(Color.red, 1f);
+    void OnMouseDown() {
+        CursorManager.Instance.SetCursor(CursorManager.CursorType.Click, force: true);
+    }
+
+    void OnMouseEnter() {
+        CursorManager.Instance.SetCursor(CursorManager.CursorType.Hover, force: true, looping: true);
+    }
+
+    void OnMouseExit() {
+        CursorManager.Instance.ResetCursor();
     }
 
     // Apply rotation and velocity to the Peon based on their current state
@@ -378,7 +383,6 @@ public class Peon : MonoBehaviour
         float twentyPercent = original * ((percent * 2) / 100);
         return original + (Random.value * twentyPercent) - (twentyPercent / 2.0f);
     }
-
 
     void SetMoving(bool move) {
         this.move = move;
