@@ -11,9 +11,9 @@ public class VictoryScreen : MonoBehaviour
         FadeOut,
     }
     public GameObject scoreBackground;
-    private Image fadeOut;
-    private Text timeTakenText;
-    private Text bestTimeText;
+    public Image fadeOut;
+    public Text timeTakenText;
+    public Text bestTimeText;
     private State state = State.FadeIn;
     private float fadeInTimer = 0.0f;
     private float visibleTimer = 0.0f;
@@ -26,13 +26,6 @@ public class VictoryScreen : MonoBehaviour
     private const string NEW_HIGH_SCORE = "New high score!";
     private const string TIME_PREFS_KEY = "TIME";
     private const string HIGH_SCORE_PREFS_KEY = "HIGH_SCORE";
-
-    void Start()
-    {
-        fadeOut = GameObject.Find("Black").GetComponent<Image>();
-        timeTakenText = GameObject.Find("TimeTaken").GetComponent<Text>();
-        bestTimeText = GameObject.Find("BestTime").GetComponent<Text>();
-    }
 
     void Update()
     {
