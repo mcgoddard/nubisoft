@@ -26,6 +26,22 @@ public class CameraControls : MonoBehaviour
         // Zoom camera based on how much the scroll wheel has moved
         this.camera.orthographicSize = Mathf.Clamp(this.camera.orthographicSize - Input.mouseScrollDelta.y, MIN_ZOOM_LEVEL, MAX_ZOOM_LEVEL);
 
+        if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D)) {
+            this.transform.position += Vector3.right * CAMERA_PAN_SPEED * Time.deltaTime;
+        }
+
+        if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A)) {
+            this.transform.position += Vector3.left * CAMERA_PAN_SPEED * Time.deltaTime;
+        }
+
+        if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W)) {
+            this.transform.position += Vector3.up * CAMERA_PAN_SPEED * Time.deltaTime;
+        }
+
+        if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S)) {
+            this.transform.position += Vector3.down * CAMERA_PAN_SPEED * Time.deltaTime;
+        }
+
         if (Input.GetMouseButton(2)) {
             if (Input.GetMouseButtonDown(2)) {
                 // If this is the first frame that middle mouse button was pressed,
