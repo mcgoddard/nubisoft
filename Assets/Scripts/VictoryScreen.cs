@@ -10,6 +10,7 @@ public class VictoryScreen : MonoBehaviour
         Visible,
         FadeOut,
     }
+    public GameObject scoreBackground;
     private Image fadeOut;
     private Text timeTakenText;
     private Text bestTimeText;
@@ -55,6 +56,7 @@ public class VictoryScreen : MonoBehaviour
                     {
                         bestTimeText.text = BEST_TIME_PREFIX + (int)highScore;
                     }
+                    scoreBackground.SetActive(true);
                 }
                 break;
             case State.Visible:
@@ -63,6 +65,7 @@ public class VictoryScreen : MonoBehaviour
                 {
                     state = State.FadeOut;
                     // We don't actually fade here, just cut to black
+                    scoreBackground.SetActive(false);
                     fadeOut.color = new Color32(0,0,0,255);
                     timeTakenText.text = "";
                     bestTimeText.text = "";

@@ -4,6 +4,8 @@ using UnityEngine.UI;
 
 public class MainMenu : MonoBehaviour
 {
+    public GameObject controls;
+    public GameObject credits;
     private Image fadeOut;
     private bool fading = false;
     private float fadeOutTimer = 0.0f;
@@ -28,10 +30,40 @@ public class MainMenu : MonoBehaviour
                 fadeOut.color = new Color32(0,0,0,(byte)(255*(fadeOutTimer/FADE_OUT_TIME)));
             }
         }
+        if (Input.GetKeyDown("escape"))
+        {
+            HideControls();
+            HideCredits();
+        }
     }
 
-    public void PlayGame ()
+    public void PlayGame()
     {
         fading = true;
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
+    }
+
+    public void DisplayControls()
+    {
+        controls.SetActive(true);
+    }
+
+    public void HideControls()
+    {
+        controls.SetActive(false);
+    }
+
+    public void DisplayCredits()
+    {
+        credits.SetActive(true);
+    }
+
+    public void HideCredits()
+    {
+        credits.SetActive(false);
     }
 }

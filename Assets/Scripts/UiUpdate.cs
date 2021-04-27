@@ -32,9 +32,6 @@ public class UiUpdate : MonoBehaviour
     public float fear = 5.0f;
     public float time = 0.0f;
     private Text sacrificesText;
-    private Text killsText;
-    private Text fearText;
-    private Text bunniesText;
     private Text timeText;
     private Image fadeOut;
     private AudioSource backgroundMusic;
@@ -62,11 +59,8 @@ public class UiUpdate : MonoBehaviour
         } else {
             time = 0.0f;
         }
-        sacrificesText = this.transform.Find("Sacrifices").GetComponent<Text>();
-        killsText = this.transform.Find("Kills").GetComponent<Text>();
-        fearText = this.transform.Find("Fear").GetComponent<Text>();
-        bunniesText = this.transform.Find("Bunnies").GetComponent<Text>();
-        timeText = this.transform.Find("Time").GetComponent<Text>();
+        sacrificesText = GameObject.Find("Sacrifices").GetComponent<Text>();
+        timeText = GameObject.Find("Time").GetComponent<Text>();
     }
 
     // Update is called once per frame
@@ -113,9 +107,6 @@ public class UiUpdate : MonoBehaviour
         {
             time += Time.deltaTime;
             sacrificesText.text = "Bunnies Sacrificed: " + sacrifices + "/" + targetSacrificies;
-            killsText.text = "Bunnies Killed: " + kills;
-            fearText.text = "Fear Level: " + fear;
-            bunniesText.text = "Bunnies: " + bunnies;
             timeText.text = "Time: " + (int)time;
         }
     }

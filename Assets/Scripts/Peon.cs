@@ -24,7 +24,7 @@ public class Peon : MonoBehaviour
     private UiUpdate uiUpdate;
     private Animator animator;
     private float stateChangeTimeout = STATE_CHANGE_TIMEOUT;
-    private float randomDirectionTimeout = RANDOM_DIRECTION_TIMEOUT;
+    // private float randomDirectionTimeout = RANDOM_DIRECTION_TIMEOUT;
     private new Rigidbody2D rigidbody;
     private const float SPEED = 1f;
     private const float ROTATION_SPEED = 10f;
@@ -196,10 +196,6 @@ public class Peon : MonoBehaviour
         {
             audioSource.mute = true;
         }
-    }
-
-    void OnMouseEnter() {
-        Debug.LogFormat("State: {0}", state, path);
     }
 
     void ShowPath(float duration = 0f) {
