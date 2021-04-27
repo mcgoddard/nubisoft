@@ -271,6 +271,10 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 77d7a0a0f0c8baa249f868b99502fe37, type: 3}
   - {fileID: 8300000, guid: 69a075a27203aec518aebb3f741fc59f, type: 3}
   - {fileID: 8300000, guid: 0475dcb66193ba660a8386a436e20a45, type: 3}
+  screamSamples:
+  - {fileID: 8300000, guid: 6039675a6c7b4848d92a496ccc1ce266, type: 3}
+  - {fileID: 8300000, guid: ca081d777133a46d981eba5b1967b95a, type: 3}
+  - {fileID: 8300000, guid: e6654be542401e9d8b71aa332e0cbfd4, type: 3}
   bloodSplatDecal: {fileID: 8122061277847696965, guid: a67b08d532491b40891763b5fcb42ddd, type: 3}
 --- !u!58 &1778576840
 CircleCollider2D:

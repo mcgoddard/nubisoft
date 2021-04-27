@@ -164,6 +164,7 @@ GameObject:
   - component: {fileID: 2723985915584523114}
   - component: {fileID: 746317314710877519}
   - component: {fileID: 595227447186823212}
+  - component: {fileID: 5156895420480709393}
   m_Layer: 5
   m_Name: Flee
   m_TagString: Untagged
@@ -285,6 +286,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 1
+--- !u!114 &5156895420480709393
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2136118883868786526}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a51b80047e615b02f9a21247846924f4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2840111545647083841
 GameObject:
   m_ObjectHideFlags: 0
@@ -429,6 +442,7 @@ GameObject:
   - component: {fileID: 4005700463704576708}
   - component: {fileID: 2413434771748020104}
   - component: {fileID: 6728179180495228556}
+  - component: {fileID: 577514700629392270}
   m_Layer: 5
   m_Name: Text
   m_TagString: Untagged
@@ -497,6 +511,18 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: Persist
+--- !u!114 &577514700629392270
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3573036624897633633}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a51b80047e615b02f9a21247846924f4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &4152192112041370498
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,0 +1,98 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &559506275447905822
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 559506275447905808}
+  - component: {fileID: 559506275447905809}
+  m_Layer: 0
+  m_Name: Cursor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &559506275447905808
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 559506275447905822}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.4209841, y: 0.4193786, z: -7.556439}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &559506275447905809
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 559506275447905822}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1bf20382ec5ec5754be29f38a0cd1983, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cursorAnimations:
+  - type: 0
+    frames:
+    - texture: {fileID: 2800000, guid: f60989b0a16ac97a194b0d5b5f4c9c5a, type: 3}
+      frameTime: 2
+      audioClips: []
+    - texture: {fileID: 2800000, guid: 626f0fb1879018c90a321ba2f136276b, type: 3}
+      frameTime: 0.2
+      audioClips: []
+    - texture: {fileID: 2800000, guid: f60989b0a16ac97a194b0d5b5f4c9c5a, type: 3}
+      frameTime: 0.2
+      audioClips: []
+    - texture: {fileID: 2800000, guid: 626f0fb1879018c90a321ba2f136276b, type: 3}
+      frameTime: 0.2
+      audioClips: []
+    - texture: {fileID: 2800000, guid: f60989b0a16ac97a194b0d5b5f4c9c5a, type: 3}
+      frameTime: 0.2
+      audioClips: []
+    - texture: {fileID: 2800000, guid: 626f0fb1879018c90a321ba2f136276b, type: 3}
+      frameTime: 0.2
+      audioClips: []
+    hotspot: {x: 0, y: 0}
+  - type: 1
+    frames:
+    - texture: {fileID: 2800000, guid: 626f0fb1879018c90a321ba2f136276b, type: 3}
+      frameTime: 0.05
+      audioClips: []
+    - texture: {fileID: 2800000, guid: f60989b0a16ac97a194b0d5b5f4c9c5a, type: 3}
+      frameTime: 0.05
+      audioClips: []
+    hotspot: {x: 0, y: 0}
+  - type: 2
+    frames:
+    - texture: {fileID: 2800000, guid: a3b6ceadd9cb746fd98b09a31fc508ed, type: 3}
+      frameTime: 0.1
+      audioClips: []
+    - texture: {fileID: 2800000, guid: f60989b0a16ac97a194b0d5b5f4c9c5a, type: 3}
+      frameTime: 0
+      audioClips:
+      - {fileID: 8300000, guid: 21aeef62a4c96decc965c23f77a41342, type: 3}
+      - {fileID: 8300000, guid: 99a9e45f6bc700f8cb3490e1830d5c0b, type: 3}
+      - {fileID: 8300000, guid: bee0ed13aa127bdb38781f9e5decb277, type: 3}
+    hotspot: {x: 0, y: 0}
+  - type: 3
+    frames:
+    - texture: {fileID: 2800000, guid: a3b6ceadd9cb746fd98b09a31fc508ed, type: 3}
+      frameTime: 0.1
+      audioClips: []
+    - texture: {fileID: 2800000, guid: 626f0fb1879018c90a321ba2f136276b, type: 3}
+      frameTime: 0.1
+      audioClips:
+      - {fileID: 8300000, guid: d8f3346be92edf2bd94a757d4c5832ef, type: 3}
+    hotspot: {x: 0, y: 0}

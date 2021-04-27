@@ -8,6 +8,7 @@ public class Spawner : MonoBehaviour
     // Start is called before the first frame update
     public GameObject peonPrefab;
     public GameObject bunnyPrefab;
+    public AudioClip bunnySpawnSound;
     public int peonCount = 50;
     private const float MAP_SIZE = 18.0f;
     private Bounds mapBounds;
@@ -52,6 +53,7 @@ public class Spawner : MonoBehaviour
 
     public void SpawnBunny(Vector3 position)
     {
+        CursorManager.Instance.SetCursor(CursorManager.CursorType.RightClick);
         Instantiate(bunnyPrefab, position, Quaternion.identity, this.transform);
     }
 
