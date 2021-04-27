@@ -55,6 +55,10 @@ jobs:
         UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
       with:
         targetPlatform: StandaloneOSX
+    - name: Add executable bit to binary
+      uses: actions/github-script@v4.0.2
+      with:
+        script: chmod +x build/Standalone/StandaloneOSX.app/Contents/MacOS/Peons
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
@@ -83,6 +87,10 @@ jobs:
         UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
       with:
         targetPlatform: StandaloneLinux64
+    - name: Add executable bit to binary
+      uses: actions/github-script@v4.0.2
+      with:
+        script: chmod +x build/StandaloneLinux64/StandaloneLinux64
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
